@@ -1,11 +1,12 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { getUser } from "@/queries/queries";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react-native";
-import { useState } from "react";
-import { Image, Modal, SafeAreaView, Switch, Text, TouchableOpacity, View, TouchableWithoutFeedback, TextInput } from "react-native";
+import { useEffect, useState } from "react";
+import { Image, Modal, SafeAreaView, Switch, Text, TouchableOpacity, View, TouchableWithoutFeedback, TextInput, StyleSheet } from "react-native";
 
 export const CycleReminders = () => {
   const options =[
@@ -21,6 +22,33 @@ export const CycleReminders = () => {
     newToggleStates[index] = !newToggleStates[index];
     setToggleStates(newToggleStates);
   };
+
+  useEffect(() => {
+    const loadToggleStates = async () => {
+      try {
+        const savedStates = await AsyncStorage.getItem('toggleStates');
+        if (savedStates !== null) {
+          setToggleStates(JSON.parse(savedStates));
+        }
+      } catch (error) {
+        console.error('Failed to load toggle states:', error);
+      }
+    };
+
+    loadToggleStates();
+  }, []);
+
+  useEffect(() => {
+    const saveToggleStates = async () => {
+      try {
+        await AsyncStorage.setItem('toggleStates', JSON.stringify(toggleStates));
+      } catch (error) {
+        console.error('Failed to save toggle states:', error);
+      }
+    };
+
+    saveToggleStates();
+  }, [toggleStates]);
 
   return (
     <View style={{ marginHorizontal: 16 }} className={`flex gap-6 text-black w-full`}>
@@ -45,6 +73,33 @@ export const CycleReminders = () => {
 
 export const MedicineReminder = () => {
   const [remindMedicine, setRemindMedicine] = useState(false);
+
+  useEffect(() => {
+    const loadRemindMedicine = async () => {
+      try {
+        const savedState = await AsyncStorage.getItem('remindMedicine');
+        if (savedState !== null) {
+          setRemindMedicine(JSON.parse(savedState));
+        }
+      } catch (error) {
+        console.error('Failed to load remindMedicine state:', error);
+      }
+    };
+
+    loadRemindMedicine();
+  }, []);
+
+  useEffect(() => {
+    const saveRemindMedicine = async () => {
+      try {
+        await AsyncStorage.setItem('remindMedicine', JSON.stringify(remindMedicine));
+      } catch (error) {
+        console.error('Failed to save remindMedicine state:', error);
+      }
+    };
+
+    saveRemindMedicine();
+  }, [remindMedicine]);
 
   return (
     <View style={{ marginHorizontal: 16 }} className="flex flex-row text-black">
@@ -77,6 +132,41 @@ export const ContraceptionReminders = () => {
     { name: "Injection", icon: "syringe" },
     { name: "Implant", icon: "implant" },
   ];
+
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        const savedTrackContraception = await AsyncStorage.getItem('trackContraception');
+        const savedReminder = await AsyncStorage.getItem('reminder');
+        const savedClickMethod = await AsyncStorage.getItem('clickMethod');
+        const savedSelectedMethod = await AsyncStorage.getItem('selectedMethod');
+
+        if (savedTrackContraception !== null) setTrackContraception(JSON.parse(savedTrackContraception));
+        if (savedReminder !== null) setReminder(JSON.parse(savedReminder));
+        if (savedClickMethod !== null) setClickMethod(JSON.parse(savedClickMethod));
+        if (savedSelectedMethod !== null) setSelectedMethod(savedSelectedMethod);
+      } catch (error) {
+        console.error('Failed to load states:', error);
+      }
+    };
+
+    loadStates();
+  }, []);
+
+  useEffect(() => {
+    const saveStates = async () => {
+      try {
+        await AsyncStorage.setItem('trackContraception', JSON.stringify(trackContraception));
+        await AsyncStorage.setItem('reminder', JSON.stringify(reminder));
+        await AsyncStorage.setItem('clickMethod', JSON.stringify(clickMethod));
+        await AsyncStorage.setItem('selectedMethod', selectedMethod);
+      } catch (error) {
+        console.error('Failed to save states:', error);
+      }
+    };
+
+    saveStates();
+  }, [trackContraception, reminder, clickMethod, selectedMethod]);
 
   return (
     <>
@@ -155,6 +245,33 @@ export const ContraceptionReminders = () => {
 export const MeditationReminder = () => {
   const [meditationReminder, setMeditationReminder] = useState(false);
 
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const savedMeditationReminder = await AsyncStorage.getItem('meditationReminder');
+        if (savedMeditationReminder !== null) {
+          setMeditationReminder(JSON.parse(savedMeditationReminder));
+        }
+      } catch (error) {
+        console.error('Failed to load state:', error);
+      }
+    };
+
+    loadState();
+  }, []);
+
+  useEffect(() => {
+    const saveState = async () => {
+      try {
+        await AsyncStorage.setItem('meditationReminder', JSON.stringify(meditationReminder));
+      } catch (error) {
+        console.error('Failed to save state:', error);
+      }
+    };
+
+    saveState();
+  }, [meditationReminder]);
+
   return (
     <View className="mx-4 flex flex-row">
       <View className="flex-1">
@@ -175,6 +292,32 @@ export const MeditationReminder = () => {
 export const DailyLoggingReminders = () => {
   const [dailyLoggingReminders, setDailyLoggingReminders] = useState(false);
 
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const savedDailyLoggingReminders = await AsyncStorage.getItem('dailyLoggingReminders');
+        if (savedDailyLoggingReminders !== null) {
+          setDailyLoggingReminders(JSON.parse(savedDailyLoggingReminders));
+        }
+      } catch (error) {
+        console.error('Failed to load state:', error);
+      }
+    };
+
+    loadState();
+  }, []);
+
+  useEffect(() => {
+    const saveState = async () => {
+      try {
+        await AsyncStorage.setItem('dailyLoggingReminders', JSON.stringify(dailyLoggingReminders));
+      } catch (error) {
+        console.error('Failed to save state:', error);
+      }
+    };
+
+    saveState();
+  }, [dailyLoggingReminders]);
   return (
     <View className="mx-4 flex flex-row">
       <View className="flex-1">
@@ -221,6 +364,33 @@ export const TrackingReminder = () => {
 export const SecretReminders = () => {
   const [isSecret, setIsSecret] = useState(false);
   
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const savedIsSecret = await AsyncStorage.getItem('isSecret');
+        if (savedIsSecret !== null) {
+          setIsSecret(JSON.parse(savedIsSecret));
+        }
+      } catch (error) {
+        console.error('Failed to load state:', error);
+      }
+    };
+
+    loadState();
+  }, []);
+
+  useEffect(() => {
+    const saveState = async () => {
+      try {
+        await AsyncStorage.setItem('isSecret', JSON.stringify(isSecret));
+      } catch (error) {
+        console.error('Failed to save state:', error);
+      }
+    };
+
+    saveState();
+  }, [isSecret]);
+
   return (
     <View className="mx-6">
       <Text className="">Choose the apearance of your reminders</Text>
@@ -262,9 +432,21 @@ export const YourName = () => {
   const [name, setName] = useState(userData?.name || "");
   const [readOnly, setReadOnly] = useState(false);
 
-  if (userData) {
+useEffect(() => {
+    const loadName = async () => {
+      const storedName = await AsyncStorage.getItem('userName');
+      if (storedName) {
+        setName(storedName);
+        setReadOnly(true);
+      }
+    };
+    loadName();
+  }, []);
+
+  const saveName = async () => {
+    await AsyncStorage.setItem('userName', name);
     setReadOnly(true);
-  }
+  };
 
   return (
     <View className="mx-4">
@@ -282,7 +464,7 @@ export const YourName = () => {
           <Text className="font-semibold text-black text-center">Close</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="p-3 bg-[#E4258F] rounded-xl w-24">
+        <TouchableOpacity onPress={saveName} className="p-3 bg-[#E4258F] rounded-xl w-24">
           <Text className="font-semibold text-white text-center">Save</Text>
         </TouchableOpacity>
       </View>
@@ -297,12 +479,28 @@ export const SecureAccess = () => {
   const [confirmPin, setConfirmPin] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = () => {
-    if (pin !== confirmPin) {
-      setError('Pins do not match');
-      return;
+  const handlePinChange = (text: string) => {
+    if (/^\d*$/.test(text) && text.length <= 4) {
+      setPin(text);
     }
-    console.log("Pin: ", pin);
+  };
+
+  const handleConfirmPinChange = (text: string) => {
+    if (/^\d*$/.test(text) && text.length <= 4) {
+      setConfirmPin(text);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (pin.length !== 4) {
+      setError("PIN must be 4 characters");
+    } else if (pin !== confirmPin) {
+      setError("PINs do not match");
+    } else {
+      setPin('');
+      setConfirmPin('');
+      setShowPinPage(false)
+    }
   };
 
   return (
@@ -338,18 +536,61 @@ export const SecureAccess = () => {
       </View>
     </View>
     ) : (
-      <Modal>
-        <View>
-
-        </View>
-      </Modal>
-    )}
+        <Modal transparent={true} animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.title}>Enter 4-digit PIN</Text>
+              <TextInput
+                style={styles.pinInput}
+                value={pin}
+                onChangeText={handlePinChange}
+                keyboardType="numeric"
+                maxLength={4}
+                secureTextEntry={true}
+                placeholder="Enter PIN"
+              />
+              <TextInput
+                style={styles.pinInput}
+                value={confirmPin}
+                onChangeText={handleConfirmPinChange}
+                keyboardType="numeric"
+                maxLength={4}
+                secureTextEntry={true}
+                placeholder="Confirm PIN"
+              />      
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={onClose} style={styles.button}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </>
   );
 }
 
 export const Themes = () => {
   const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const loadDarkMode = async () => {
+      const storedDarkMode = await AsyncStorage.getItem('darkMode');
+      if (storedDarkMode !== null) {
+        setDarkMode(JSON.parse(storedDarkMode));
+      }
+    };
+    loadDarkMode();
+  }, []);
+  
+  const saveDarkMode = async (value: boolean) => {
+    await AsyncStorage.setItem('darkMode', JSON.stringify(value));
+    setDarkMode(value);
+  };
 
   return (
     <View className="mx-4">
@@ -361,7 +602,7 @@ export const Themes = () => {
           className="ml-auto"
           trackColor={{ false: "#767577", true: "#FF69B4" }}
           thumbColor={darkMode ? "#fff" : "#f4f3f4"}
-          onValueChange={() => setDarkMode(!darkMode)}
+          onValueChange={saveDarkMode}
           value={darkMode}
         />
       </View>
@@ -378,11 +619,23 @@ export const CalenderView = () => {
 
   const [toggleStates, setToggleStates] = useState(options.map(() => false));
 
-  const handleToggle = (index: number) => {
+  useEffect(() => {
+    const loadToggleStates = async () => {
+      const storedToggleStates = await AsyncStorage.getItem('toggleStates');
+      if (storedToggleStates !== null) {
+        setToggleStates(JSON.parse(storedToggleStates));
+      }
+    };
+    loadToggleStates();
+  }, []);
+
+  const handleToggle = async(index: number) => {
     const newToggleStates = [...toggleStates];
     newToggleStates[index] = !newToggleStates[index];
     setToggleStates(newToggleStates);
+    await AsyncStorage.setItem('toggleStates', JSON.stringify(newToggleStates));
   };
+
   
   return (
     <View className="mx-4">
@@ -408,6 +661,22 @@ export const CalenderView = () => {
 export const BackupData = () => {
   const [backupData, setBackUpData] = useState(false);
 
+  useEffect(() => {
+    const loadBackupData = async () => {
+      const storedBackupData = await AsyncStorage.getItem('backupData');
+      if (storedBackupData !== null) {
+        setBackUpData(JSON.parse(storedBackupData));
+      }
+    };
+    loadBackupData();
+  }, []);
+
+  const handleToggle = async () => {
+    const newBackupData = !backupData;
+    setBackUpData(newBackupData);
+    await AsyncStorage.setItem('backupData', JSON.stringify(newBackupData));
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }} className="mx-4">
       <View className="flex flex-row justify-center items-center my-4">
@@ -419,7 +688,7 @@ export const BackupData = () => {
           className="ml-auto"
           trackColor={{ false: "#767577", true: "#FF69B4" }}
           thumbColor={backupData ? "#fff" : "#f4f3f4"}
-          onValueChange={() => setBackUpData(!backupData)}
+          onValueChange={handleToggle}
           value={backupData}
         />
       </View>
@@ -473,6 +742,15 @@ export const RestoreData = () => {
 export const DeleteData = () => {
   const [showModal, setShowModal] = useState(false);
 
+  const handleDeleteData = async () => {
+    try {
+      await AsyncStorage.clear();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Failed to delete data', error);
+    }
+  };
+
   return (
     <>
     {showModal && (
@@ -484,7 +762,7 @@ export const DeleteData = () => {
             <TouchableOpacity onPress={() => setShowModal(false)} className="bg-white border border-black/20 p-3 rounded-xl w-24">
               <Text className="font-semibold text-black text-center">Close</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="p-3 bg-[#E4258F] rounded-xl w-24">
+            <TouchableOpacity onPress={handleDeleteData} className="p-3 bg-[#E4258F] rounded-xl w-24">
               <Text className="font-semibold text-white text-center">Delete</Text>
             </TouchableOpacity>
           </View>
@@ -523,3 +801,51 @@ export const Help = () => {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  pinInput: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    textAlign: 'center',
+    marginBottom: 20,
+    fontSize: 18,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#E4258F',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});

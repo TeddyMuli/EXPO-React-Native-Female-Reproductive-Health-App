@@ -10,6 +10,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import "./globals.css"
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

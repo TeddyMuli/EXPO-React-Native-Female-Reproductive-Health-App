@@ -15,7 +15,9 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.femihub.ios"
+      "bundleIdentifier": "com.femihub.ios",
+      "adaptiveIcon": "",
+      "icon": "./assets/images/logo.png"
     },
     "android": {
       "adaptiveIcon": {
