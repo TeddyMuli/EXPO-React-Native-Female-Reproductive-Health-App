@@ -1,13 +1,15 @@
 import { Image, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import splashImage from "../assets/images/splash.png"
 import { StatusBar } from 'expo-status-bar'
 import { useRouter } from 'expo-router'
 import { useFonts } from 'expo-font';
 import { useAuth } from './context/AuthContext'
+import AppLock from "@/components/AppLock";
 
 const index = () => {
   const { user, setUser } = useAuth();
+
   const[fontsLoaded] = useFonts({
     'Amiri-bold': require('../assets/fonts/Amiri-Bold.ttf')
   })

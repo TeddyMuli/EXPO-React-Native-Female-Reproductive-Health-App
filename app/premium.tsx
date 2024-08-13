@@ -1,20 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import periodTracker from "../assets/images/periodtracker.png"
 import chatbot from "../assets/images/chatbot.jpg"
 import doctor from "../assets/images/doctor.jpg"
 import Chat from '@/components/Chat';
+import { useAuth } from './context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const PeriodTracker = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const { isSubscribed } = useAuth();
+  const router = useRouter()
 
   const handleDateSelect = (day: any) => {
     setSelectedDate(day.dateString);
     setShowCalendar(false);
   };
+
+  useEffect(() => {
+    if (!isSubscribed) {
+      router.push("/more")
+    }
+  }, [isSubscribed])
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false} >

@@ -7,18 +7,20 @@ import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as SecureStore from 'expo-secure-store';
-import { isSignInWithEmailLink, sendSignInLinkToEmail, signInWithEmailLink } from "firebase/auth";
+import { isSignInWithEmailLink, sendPasswordResetEmail, sendSignInLinkToEmail, signInWithEmailLink } from "firebase/auth";
 import { auth } from '@/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useToast } from 'react-native-toast-notifications';
 
 const validationSchema = z
   .object({
     email: z.string().email().min(1, "Email is required!")
   });
 
-const PasswordlessSignin = () => {
+const forgotPassword = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const toast = useToast()
 
   const { 
     getValues,
@@ -57,56 +59,19 @@ const PasswordlessSignin = () => {
     }
   };
 
+  const sendResetPasswordLink = async () => {
+    const email = getValues().email;
 
-  const onSubmit = async () => {
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-          'X-App-Source': 'mobile' // Shows that the request is made from a mobile app
-        },
-        body: JSON.stringify(getValues())
-      });
-
-      if (response.ok) {
-        console.log("Success")
-      }
-    } catch (error) {
-      console.log("Error: ", error)
+      await sendPasswordResetEmail(auth, email);
+      toast.show('Password reset link sent to your email.');
+      router.push("/login")
+    } catch (error: any) {
+      console.error('Error sending password reset link:', error);
     }
-  };
-
-  useEffect(() => {
-    const handleOpenURL = async (event: any) => {
-      setLoading(true)
-      const { url } = event;
-      if (isSignInWithEmailLink(auth, url)) {
-        let email = await AsyncStorage.getItem('emailForSignIn');
-        if (!email) {
-          // Prompt user to provide their email
-          email = prompt('Please provide your email for confirmation');
-        }
+    
+  }
   
-        try {
-          const result = await signInWithEmailLink(auth, email!, url);
-          console.log('Successfully signed in:', result);
-          // Clear email from storage
-          await AsyncStorage.removeItem('emailForSignIn');
-        } catch (error) {
-          console.error('Error signing in:', error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-  
-    const subscription = Linking.addEventListener('url', handleOpenURL);
-  
-    return () => {
-      subscription.remove();
-    };
-  }, [loading]);
   return (
     <SafeAreaView style={{ flex: 1, }} >
       <View style={{ paddingHorizontal: 24}}>
@@ -139,7 +104,7 @@ const PasswordlessSignin = () => {
           {errors.email && <Text className="text-red-500 text-sm">{errors.email?.message}</Text>}
         </View>
 
-        <TouchableOpacity style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 56, paddingVertical: 9, borderRadius: 5,  }} 
+        <TouchableOpacity style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 56, paddingVertical: 9, borderRadius: 5 }} 
           >
           <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Submit</Text>
         </TouchableOpacity>
@@ -152,6 +117,6 @@ const PasswordlessSignin = () => {
   )
 }
 
-export default PasswordlessSignin
+export default forgotPassword
 
 const styles = StyleSheet.create({})

@@ -9,6 +9,7 @@ import axios from "axios";
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Post from '@/components/Post';
 
 interface NewPost {
   user_id: string;
@@ -26,52 +27,75 @@ const validationSchema = z
     post: z.string().min(1, "This field is required")
   })
 
-const createForumPost = async (newPost: NewPost): Promise<PostResponse> => {
-  const response = await axios.post('/forum_posts', newPost);
-  return response.data;
-};
-
 export default function App() {
   const queryClient = useQueryClient();
 
   const { data: usersData, error: usersError, isLoading: usersLoading } = useQuery({ queryKey: ['users'], queryFn: () => getAllUsers() })
+  const { data: posts } = useQuery({ queryKey: ['posts'], queryFn: () => getPosts() });
+
+  const { user } = useAuth();
+  const { data: userData } = useQuery({ queryKey: ['user'], queryFn: () => getUser(user?.email) })
 
 
-  const mutation = useMutation<PostResponse, Error, NewPost>(createForumPost, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('posts');
-    },
-  });
+  const [selectedPost, setSelectedPost] = useState({});
+  const [showPost, setShowPost] = useState(false)
 
-  const onSubmit = (event: any) => {
-    event.preventDefault();
-    const formData = getValues()
-    const newPost = {
-      user_id: usersData?.id,
-      title: formData.title,
-      content: formData.post,
-    };
-    mutation.mutate(newPost);
+  const createForumPost = async (newPost: NewPost) => {
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forum_posts`, newPost);
+      if (response.status === 201) {
+        console.log("Post saved successfully: ", response.data)
+        reset({
+          title: '',
+          post: ''
+        })
+      } else {
+        console.error("Error saving post: ", response.data)
+      }
+    } catch (error) {
+      throw error;
+    }
   };
-
+  
   const {
     control,
     getValues,
     handleSubmit,
     formState: { errors },
+    reset
   } = useForm({
     resolver: zodResolver(validationSchema),
     defaultValues: {
       title: '',
       post: ''
     }
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: (newPost: NewPost) => createForumPost(newPost),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    }
   })
+
+  const onSubmit = () => {
+    const formData = getValues()
+    const newPost = {
+      user_id: userData?.id,
+      title: formData.title,
+      content: formData.post,
+    };
+
+    mutate(newPost)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
+        {!showPost ? (
+          <>
+          <View style={styles.header}>
           <Text style={styles.headerText}>
             We can connect and learn more from various past experiences and journeys
           </Text>
@@ -82,7 +106,7 @@ export default function App() {
           name="title"
           render={({field: {value, onChange, onBlur}}) => (
             <TextInput
-            style={styles.mainInput} 
+            className='border border-[#0EA9DE] p-2 justify-center items-center m-3 rounded-xl text-center'
             placeholder='Title' 
             value={value}
             onChangeText={onChange}
@@ -90,7 +114,7 @@ export default function App() {
           />
           )}
         />
-        {errors.title && <Text className='text-red-500'>{errors.title.message}</Text>}
+        {errors.title && <Text className='text-red-500 mx-8'>{errors.title.message}</Text>}
 
         <Controller
           control={control}
@@ -105,9 +129,9 @@ export default function App() {
           />
           )}
         />
-        {errors.post && <Text className='text-red-500'>{errors.post.message}</Text>}
+        {errors.post && <Text className='text-red-500 mx-8'>{errors.post.message}</Text>}
 
-          <TouchableOpacity onPress={handleSubmit(onSubmit)} className='p-3 bg-[#E4258F] rounded-xl w-[150px]'>
+          <TouchableOpacity onPress={handleSubmit(onSubmit)} className='p-3 bg-[#E4258F] rounded-xl w-[150px] justify-center items-center mx-auto mt-2'>
             <Text className='text-white text-xl font-medium text-center'>Post</Text>
           </TouchableOpacity>
         </View>
@@ -117,10 +141,14 @@ export default function App() {
             const userName = user ? user.name : 'Unknown User';
 
             return (
-              <QuestionCard key={index} post={post} userName={userName} />
+              <QuestionCard key={index} setShowPost={setShowPost} setSelectedPost={setSelectedPost} post={post} userName={userName} />
             )
           })}
         </ScrollView>
+          </>
+        ) : (
+          <Post selectedPost={selectedPost} setShowPost={setShowPost} setSelectedPost={setSelectedPost}/>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,11 +171,11 @@ const styles = StyleSheet.create({
   mainInput: {
     height: 105, 
     marginHorizontal: 15, 
-    marginTop: 20, 
+    marginTop: 8,
     textAlign: 'center', 
     borderWidth: 1, 
     borderColor: '#0EA9DE', 
-    borderRadius: 5,
+    borderRadius: 15,
     padding: 10,
   },
   scrollView: {

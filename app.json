@@ -16,7 +16,6 @@
         "usesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.femihub.ios",
-      "adaptiveIcon": "",
       "icon": "./assets/images/logo.png"
     },
     "android": {
@@ -24,7 +23,8 @@
         "foregroundImage": "./assets/images/splash.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.femihub.android"
+      "package": "com.femihub.android",
+      "usesCleartextTraffic": true
     },
     "web": {
       "bundler": "metro",

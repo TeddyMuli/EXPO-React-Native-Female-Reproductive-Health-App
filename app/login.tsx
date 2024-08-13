@@ -10,12 +10,13 @@ import { useRouter } from 'expo-router';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthErrorCodes, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
+import { AuthErrorCodes, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signInWithCredential, OAuthProvider } from 'firebase/auth';
 import { auth } from '@/firebase';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { getUser } from '@/queries/queries';
 import bcrypt from 'react-native-bcrypt';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 const validationSchema = z
   .object({
@@ -53,6 +54,29 @@ const Login = () => {
       });
     });
   };
+
+  const signInWithGoogle = async() => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user;
+      console.log("User signed in: ", user);
+    } catch (error) {
+      console.error("Error: ", error)
+    }
+  }
+
+  const signInWithApple = async () => {
+    try {
+      const provider = new OAuthProvider('apple.com');
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("User signed in: ", user);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+  
 
   const signInUser = async () => {
     const { email, password } = getValues();
@@ -167,19 +191,19 @@ const Login = () => {
             <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Login</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+          <TouchableOpacity onPress={signInWithGoogle} style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
             <Image source={googleIcon} style={{
               width: 32, height: 32, objectFit: 'cover'
             }} />
             <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Continue with Google </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+          <TouchableOpacity onPress={signInWithApple} style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
             <Image source={appleicons} style={{ width: 32, height: 32, objectFit: 'cover' }} />
             <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, }}>Continue with Apple</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>router.push('/passwordlesSignIn')} style={{marginTop:10, }}><Text style={{ color: '#E4258F', fontSize: 12 }}>Forgot Password ?</Text></TouchableOpacity>
+          <TouchableOpacity onPress={()=>router.push('/forgotPassword')} style={{marginTop:10, }}><Text style={{ color: '#E4258F', fontSize: 12 }}>Forgot Password ?</Text></TouchableOpacity>
 
         </ScrollView>
       </KeyboardAvoidingView>

@@ -2,53 +2,77 @@ import { useAuth } from "@/app/context/AuthContext";
 import { getUser } from "@/queries/queries";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Image, Modal, SafeAreaView, Switch, Text, TouchableOpacity, View, TouchableWithoutFeedback, TextInput, StyleSheet } from "react-native";
+import { Image, Modal, SafeAreaView, Switch, Text, TouchableOpacity, View, TouchableWithoutFeedback, TextInput, StyleSheet, Alert } from "react-native";
+import * as LocalAuthentication from 'expo-local-authentication';
 
-export const CycleReminders = () => {
-  const options =[
-    { name: "Period reminders", content: "Remind me at the beginning and the end of period" },
-    { name: "Fertility reminders", content: "Reminder that is triggered 1 day before you become fertile" },
-    { name: "Ovulation reminders", content: "Reminder that is triggered 1 day before you become ovulate" }
+export const CycleReminders = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+  
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'], 
+    queryFn: async () => {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    }});
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+  
+
+  const options = [
+    { name: "Period reminders", content: "Remind me at the beginning and the end of period", key: 'period_reminders' },
+    { name: "Fertility reminders", content: "Reminder that is triggered 1 day before you become fertile", key: 'fertility_reminders' },
+    { name: "Ovulation reminders", content: "Reminder that is triggered 1 day before you become ovulate", key: 'ovulation_reminders' }
   ];
 
   const [toggleStates, setToggleStates] = useState(options.map(() => false));
+
+  
+  useEffect(() => {
+    if (settings) {
+      const initialToggleStates = options.map(option => settings[option.key]);
+      setToggleStates(initialToggleStates);
+    }
+  }, [settings]);
+  
 
   const handleToggle = (index: number) => {
     const newToggleStates = [...toggleStates];
     newToggleStates[index] = !newToggleStates[index];
     setToggleStates(newToggleStates);
+
+    // Update settings in the database
+    const newSettings = {
+      user_id: userId,
+      ...options.reduce((acc: any, option, idx) => {
+        acc[option.key] = newToggleStates[idx];
+        return acc;
+      }, {}),
+    };
+
+    mutation.mutate(newSettings);
   };
 
-  useEffect(() => {
-    const loadToggleStates = async () => {
-      try {
-        const savedStates = await AsyncStorage.getItem('toggleStates');
-        if (savedStates !== null) {
-          setToggleStates(JSON.parse(savedStates));
-        }
-      } catch (error) {
-        console.error('Failed to load toggle states:', error);
-      }
-    };
-
-    loadToggleStates();
-  }, []);
-
-  useEffect(() => {
-    const saveToggleStates = async () => {
-      try {
-        await AsyncStorage.setItem('toggleStates', JSON.stringify(toggleStates));
-      } catch (error) {
-        console.error('Failed to save toggle states:', error);
-      }
-    };
-
-    saveToggleStates();
-  }, [toggleStates]);
+  //if (isLoading) return <Text>Loading...</Text>;
 
   return (
     <View style={{ marginHorizontal: 16 }} className={`flex gap-6 text-black w-full`}>
@@ -70,9 +94,54 @@ export const CycleReminders = () => {
     </View>
   );
 }
-
-export const MedicineReminder = () => {
+export const MedicineReminder = ({ userId }: {userId: number}) => {
   const [remindMedicine, setRemindMedicine] = useState(false);
+
+  const queryClient = useQueryClient();
+  
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'], 
+    queryFn: async () => {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    }});
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setRemindMedicine(settings.remind_medicine);
+    }
+  }, [settings]);
+
+  const handleToggle = () => {
+    const newRemindMedicine = !remindMedicine;
+    setRemindMedicine(newRemindMedicine);
+
+    // Update settings in the database
+    const newSettings: any = {
+      user_id: userId,
+      remind_medicine: newRemindMedicine,
+    };
+
+    mutation.mutate(newSettings);
+  };
 
   useEffect(() => {
     const loadRemindMedicine = async () => {
@@ -111,14 +180,42 @@ export const MedicineReminder = () => {
         className="ml-auto"
         trackColor={{ false: "#767577", true: "#FF69B4" }}
         thumbColor={remindMedicine ? "#fff" : "#f4f3f4"}
-        onValueChange={() => setRemindMedicine(true)}
+        onValueChange={handleToggle}
         value={remindMedicine}
       />
     </View>
   );
 }
 
-export const ContraceptionReminders = () => {
+export const ContraceptionReminders = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const response = await fetch(`/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+
   const [trackContraception, setTrackContraception] = useState(false);
   const [reminder, setReminder] = useState(false);
   const [clickMethod, setClickMethod] = useState(false);
@@ -134,40 +231,25 @@ export const ContraceptionReminders = () => {
   ];
 
   useEffect(() => {
-    const loadStates = async () => {
-      try {
-        const savedTrackContraception = await AsyncStorage.getItem('trackContraception');
-        const savedReminder = await AsyncStorage.getItem('reminder');
-        const savedClickMethod = await AsyncStorage.getItem('clickMethod');
-        const savedSelectedMethod = await AsyncStorage.getItem('selectedMethod');
+    if (settings) {
+      setTrackContraception(settings.track_contraception);
+      setReminder(settings.reminder);
+      setClickMethod(settings.click_method);
+      setSelectedMethod(settings.selected_method);
+    }
+  }, [settings]);
 
-        if (savedTrackContraception !== null) setTrackContraception(JSON.parse(savedTrackContraception));
-        if (savedReminder !== null) setReminder(JSON.parse(savedReminder));
-        if (savedClickMethod !== null) setClickMethod(JSON.parse(savedClickMethod));
-        if (savedSelectedMethod !== null) setSelectedMethod(savedSelectedMethod);
-      } catch (error) {
-        console.error('Failed to load states:', error);
-      }
+  const handleSave = () => {
+    const newSettings: any = {
+      user_id: userId,
+      track_contraception: trackContraception,
+      reminder: reminder,
+      click_method: clickMethod,
+      selected_method: selectedMethod,
     };
 
-    loadStates();
-  }, []);
-
-  useEffect(() => {
-    const saveStates = async () => {
-      try {
-        await AsyncStorage.setItem('trackContraception', JSON.stringify(trackContraception));
-        await AsyncStorage.setItem('reminder', JSON.stringify(reminder));
-        await AsyncStorage.setItem('clickMethod', JSON.stringify(clickMethod));
-        await AsyncStorage.setItem('selectedMethod', selectedMethod);
-      } catch (error) {
-        console.error('Failed to save states:', error);
-      }
-    };
-
-    saveStates();
-  }, [trackContraception, reminder, clickMethod, selectedMethod]);
-
+    mutation.mutate(newSettings);
+  };
   return (
     <>
       {!clickMethod ? (
@@ -211,7 +293,7 @@ export const ContraceptionReminders = () => {
           </View>
   
           <View className="mt-auto justify-center items-center">
-            <TouchableOpacity className="mt-auto p-3 bg-[#E4258F] rounded-xl w-[60%] justify-center">
+            <TouchableOpacity onPress={handleSave} className="mt-auto p-3 bg-[#E4258F] rounded-xl w-[60%] justify-center">
               <Text className="text-white text-center text-lg">Save</Text>
             </TouchableOpacity>
           </View>
@@ -242,35 +324,52 @@ export const ContraceptionReminders = () => {
   )
 }
 
-export const MeditationReminder = () => {
+export const MeditationReminder = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings', userId],
+    queryFn: async () => {
+      const response = await fetch(`/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', userId] });
+    },
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setMeditationReminder(settings.meditation_reminder);
+    }
+  }, [settings]);
+
+  const handleSave = () => {
+    const newSettings: any = {
+      user_id: userId,
+      meditation_reminder: meditationReminder,
+    };
+
+    mutation.mutate(newSettings);
+  };
+
+
   const [meditationReminder, setMeditationReminder] = useState(false);
-
-  useEffect(() => {
-    const loadState = async () => {
-      try {
-        const savedMeditationReminder = await AsyncStorage.getItem('meditationReminder');
-        if (savedMeditationReminder !== null) {
-          setMeditationReminder(JSON.parse(savedMeditationReminder));
-        }
-      } catch (error) {
-        console.error('Failed to load state:', error);
-      }
-    };
-
-    loadState();
-  }, []);
-
-  useEffect(() => {
-    const saveState = async () => {
-      try {
-        await AsyncStorage.setItem('meditationReminder', JSON.stringify(meditationReminder));
-      } catch (error) {
-        console.error('Failed to save state:', error);
-      }
-    };
-
-    saveState();
-  }, [meditationReminder]);
 
   return (
     <View className="mx-4 flex flex-row">
@@ -282,42 +381,62 @@ export const MeditationReminder = () => {
         className="ml-auto px-2"
         trackColor={{ false: "#767577", true: "#FF69B4" }}
         thumbColor={meditationReminder ? "#fff" : "#f4f3f4"}
-        onValueChange={() => setMeditationReminder(!meditationReminder)}
+        onValueChange={() => {
+          setMeditationReminder(!meditationReminder)
+          handleSave()
+        }}
         value={meditationReminder}
       />
     </View>
   );
 }
 
-export const DailyLoggingReminders = () => {
+export const DailyLoggingReminders = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings', userId],
+    queryFn: async () => {
+      const response = await fetch(`/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', userId] });
+    },
+  });
+
   const [dailyLoggingReminders, setDailyLoggingReminders] = useState(false);
 
   useEffect(() => {
-    const loadState = async () => {
-      try {
-        const savedDailyLoggingReminders = await AsyncStorage.getItem('dailyLoggingReminders');
-        if (savedDailyLoggingReminders !== null) {
-          setDailyLoggingReminders(JSON.parse(savedDailyLoggingReminders));
-        }
-      } catch (error) {
-        console.error('Failed to load state:', error);
-      }
+    if (settings) {
+      setDailyLoggingReminders(settings.daily_logging_reminders);
+    }
+  }, [settings]);
+
+  const handleSave = () => {
+    const newSettings: any = {
+      user_id: userId,
+      daily_logging_reminders: dailyLoggingReminders,
     };
 
-    loadState();
-  }, []);
+    mutation.mutate(newSettings);
+  };
 
-  useEffect(() => {
-    const saveState = async () => {
-      try {
-        await AsyncStorage.setItem('dailyLoggingReminders', JSON.stringify(dailyLoggingReminders));
-      } catch (error) {
-        console.error('Failed to save state:', error);
-      }
-    };
-
-    saveState();
-  }, [dailyLoggingReminders]);
   return (
     <View className="mx-4 flex flex-row">
       <View className="flex-1">
@@ -328,15 +447,62 @@ export const DailyLoggingReminders = () => {
         className="ml-auto"
         trackColor={{ false: "#767577", true: "#FF69B4" }}
         thumbColor={dailyLoggingReminders ? "#fff" : "#f4f3f4"}
-        onValueChange={() => setDailyLoggingReminders(!dailyLoggingReminders)}
+        onValueChange={() => {
+          setDailyLoggingReminders(!dailyLoggingReminders)
+          handleSave()
+        }}
         value={dailyLoggingReminders}
       />
     </View>
   );
 }
 
-export const TrackingReminder = () => {
+export const TrackingReminder = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings', userId],
+    queryFn: async () => {
+      const response = await fetch(`/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', userId] });
+    },
+  });
+
   const [trackingReminder, setTrackingReminder] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setTrackingReminder(settings.tracking_reminder);
+    }
+  }, [settings]);
+
+  const handleSave = () => {
+    const newSettings: any = {
+      user_id: userId,
+      tracking_reminder: trackingReminder,
+    };
+
+    mutation.mutate(newSettings);
+  };
+
 
   return (
     <View className="mx-4">
@@ -349,7 +515,10 @@ export const TrackingReminder = () => {
           className="ml-auto"
           trackColor={{ false: "#767577", true: "#FF69B4" }}
           thumbColor={trackingReminder ? "#fff" : "#f4f3f4"}
-          onValueChange={() => setTrackingReminder(!trackingReminder)}
+          onValueChange={() => {
+            setTrackingReminder(!trackingReminder)
+            handleSave()
+          }}
           value={trackingReminder}
         />
       </View>
@@ -361,40 +530,56 @@ export const TrackingReminder = () => {
   );
 }
 
-export const SecretReminders = () => {
+export const SecretReminders = ({ userId }: {userId: number}) => {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings', userId],
+    queryFn: async () => {
+      const response = await fetch(`/settings?user_id=${userId}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const response = await fetch('/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSettings),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', userId] });
+    },
+  });
+
   const [isSecret, setIsSecret] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setIsSecret(settings.meditation_reminder);
+    }
+  }, [settings]);
+
+  const handleSave = () => {
+    const newSettings: any = {
+      user_id: userId,
+      is_secret: isSecret,
+    };
+
+    mutation.mutate(newSettings);
+  };
   
-  useEffect(() => {
-    const loadState = async () => {
-      try {
-        const savedIsSecret = await AsyncStorage.getItem('isSecret');
-        if (savedIsSecret !== null) {
-          setIsSecret(JSON.parse(savedIsSecret));
-        }
-      } catch (error) {
-        console.error('Failed to load state:', error);
-      }
-    };
-
-    loadState();
-  }, []);
-
-  useEffect(() => {
-    const saveState = async () => {
-      try {
-        await AsyncStorage.setItem('isSecret', JSON.stringify(isSecret));
-      } catch (error) {
-        console.error('Failed to save state:', error);
-      }
-    };
-
-    saveState();
-  }, [isSecret]);
-
   return (
     <View className="mx-6">
       <Text className="">Choose the apearance of your reminders</Text>
-      <TouchableOpacity onPress={() => setIsSecret(false)} className="my-6 flex flex-row justify-center items-center">
+      <TouchableOpacity onPress={() => {setIsSecret(false), handleSave()}} className="my-6 flex flex-row justify-center items-center">
         <View className={`p-3 flex flex-row justify-center items-center rounded-xl border ${!isSecret ? "border-pink-500" : "border-black/30"}`}>
           <Image source={require("@/assets/images/profile.png")} className="w-12 h-12" />
           <View className="ml-4">
@@ -408,7 +593,7 @@ export const SecretReminders = () => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => setIsSecret(true)} className="my-6 flex flex-row justify-center items-center">
+      <TouchableOpacity onPress={() => {setIsSecret(true), handleSave()}} className="my-6 flex flex-row justify-center items-center">
         <View className={`p-3 flex flex-row justify-center items-center rounded-xl border ${isSecret ? "border-pink-500" : "border-black/30"}`}>
           <Image source={require("@/assets/images/profile.png")} className="w-12 h-12" />
           <View className="ml-4">
@@ -479,6 +664,35 @@ export const SecureAccess = () => {
   const [confirmPin, setConfirmPin] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const savedPin = await AsyncStorage.getItem('pin');
+        const savedUseBio = await AsyncStorage.getItem('useBio');
+        if (savedPin !== null) setPin(savedPin);
+        if (savedUseBio !== null) setUseBio(JSON.parse(savedUseBio));
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  useEffect(() => {
+    const saveSettings = async () => {
+      try {
+        await AsyncStorage.setItem('pin', pin);
+        await AsyncStorage.setItem('useBio', JSON.stringify(useBio));
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+      }
+    };
+
+    saveSettings();
+  }, [pin, useBio]);
+
+
   const handlePinChange = (text: string) => {
     if (/^\d*$/.test(text) && text.length <= 4) {
       setPin(text);
@@ -499,9 +713,39 @@ export const SecureAccess = () => {
     } else {
       setPin('');
       setConfirmPin('');
-      setShowPinPage(false)
+      setShowPinPage(false);
     }
   };
+
+  const handleBiometrics = async () => {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    if (!compatible) {
+      Alert.alert('Biometrics not supported', 'Your device does not support biometrics.');
+      return;
+    }
+
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!enrolled) {
+      Alert.alert('Biometrics not enrolled', 'You have not enrolled biometrics on this device.');
+      return;
+    }
+
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Authenticate to access your app',
+        fallbackLabel: 'Enter PIN',
+      });
+
+      if (result.success) {
+        Alert.alert('Authenticated', 'You are authenticated!');
+      } else {
+        Alert.alert('Authentication Failed', 'Please try again.');
+      }
+    } catch (error) {
+      console.error('Biometric authentication failed:', error);
+    }
+  };
+
 
   return (
     <>

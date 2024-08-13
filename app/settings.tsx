@@ -4,6 +4,9 @@ import SettingSection from '@/components/settings/SettingSection';
 import { Ionicons } from '@expo/vector-icons';
 import * as Settings from '@/components/settings/items/Items';
 import { useRouter } from 'expo-router';
+import { useAuth } from './context/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { getUser } from '@/queries/queries';
 
 const sections = [
   {
@@ -23,9 +26,9 @@ const sections = [
     title: 'Personal Data',
     icon: <Ionicons name="star" size={24} color="black" />,
     items: [
-      { title: 'Your name', id: 'yourName' },
-      { title: 'Secure access (PIN)', id: 'secureAccess' },
-      { title: 'Themes', id: 'themes' },
+      //{ title: 'Your name', id: 'yourName' },
+      //{ title: 'Secure access (PIN)', id: 'secureAccess' },
+      //{ title: 'Themes', id: 'themes' },
       { title: 'Calendar view', id: 'calenderView' }
     ],
   },
@@ -63,6 +66,9 @@ const CommonHeader = ({ title, onBack }: { title: string; onBack: () => void }) 
 )
 
 const SettingsScreen = () => {
+  const { user } = useAuth();
+  const { data: userData } = useQuery({ queryKey: ['user'], queryFn: () => getUser(user?.email) })
+
   const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.yourappname';
   const appStoreUrl = 'https://apps.apple.com/app/idYOUR_APP_ID';
 
@@ -135,7 +141,7 @@ const SettingsScreen = () => {
       const Component = (Settings as any)[componentKey];
       
       if (Component) {
-        return <Component />;
+        return <Component userId={userData.id} />;
       } else {
         console.log('Unhandled item:', selectedComponent);
         return null;

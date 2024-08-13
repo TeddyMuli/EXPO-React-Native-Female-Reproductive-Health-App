@@ -25,11 +25,11 @@ const splashScreen6 = () => {
 
 {/* buttons */}
       <View style={{display:'flex', alignItems:'center',position:'absolute', bottom:'5%', flexDirection:'row',justifyContent:'space-between',  width:'100%'}}>
-        <TouchableOpacity  onPress={()=>router.replace('/passwordlesSignIn')}>
+        <TouchableOpacity  onPress={()=>router.replace('/login')}>
           <Text style={{color:'#E4258F', fontWeight:700, fontSize:20}}>Skip</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={()=>router.push('/passwordlesSignIn')}>
+        <TouchableOpacity onPress={()=>router.push('/login')}>
           <Text style={{color:'#E4258F', fontWeight:700, fontSize:20}}>Next</Text>
         </TouchableOpacity>
       </View>

@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-
+import { ToastProvider } from 'react-native-toast-notifications'
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -36,49 +36,51 @@ export default function RootLayout() {
   return (
     // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="splashScreen3" options={{ headerShown: false }} />
-          <Stack.Screen name="splashScreen4" options={{ headerShown: false }} />
-          <Stack.Screen name="splashScreen5" options={{ headerShown: false }} />
-          <Stack.Screen name="splashScreen6" options={{ headerShown: false }} />
-          <Stack.Screen name="signup" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
-          <Stack.Screen name="passwordlesSignIn" options={{ headerTitle: 'Passwordless Sign-in', headerTintColor: 'black', headerBackButtonMenuEnabled: false, headerBackVisible: false, headerTitleAlign: 'center', headerStyle: { backgroundColor: '#E4258F' } }} />
-          <Stack.Screen name="handleEmailLink"  options={{ headerShown: false }} />
-          <Stack.Screen name="cart" options={{ headerShown: false }} />
-          <Stack.Screen name='verifycode' options={{ headerShown: false }} />
-          <Stack.Screen
-            name='premium'
-            options={{
-              headerTitle: 'Premium Features',
-              headerTitleAlign: 'center',
-              headerTintColor: '#FFB22C',
-              headerStyle: {
-                backgroundColor: 'black',
-              },
-            }}
-          />
-          <Stack.Screen
-            name='settings'
-            options={{
-              headerTitle: 'Settings',
-              headerTitleAlign: 'center',
-              headerRight: () => (
-                <Ionicons
-                  name="settings-outline"
-                  size={24}
-                  color="black"
-                  style={{ marginRight: 16 }}
-                />
-              ),
-            }}
-          />
-          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        </Stack>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="splashScreen3" options={{ headerShown: false }} />
+            <Stack.Screen name="splashScreen4" options={{ headerShown: false }} />
+            <Stack.Screen name="splashScreen5" options={{ headerShown: false }} />
+            <Stack.Screen name="splashScreen6" options={{ headerShown: false }} />
+            <Stack.Screen name="signup" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="profile" options={{ headerShown: false }} />
+            <Stack.Screen name="forgotPassword" options={{ headerTitle: 'Forgot Password', headerTintColor: 'black', headerBackButtonMenuEnabled: false, headerBackVisible: false, headerTitleAlign: 'center', headerStyle: { backgroundColor: '#E4258F' } }} />
+            <Stack.Screen name="handleEmailLink"  options={{ headerShown: false }} />
+            <Stack.Screen name="cart" options={{ headerShown: false }} />
+            <Stack.Screen name='verifycode' options={{ headerShown: false }} />
+            <Stack.Screen
+              name='premium'
+              options={{
+                headerTitle: 'Premium Features',
+                headerTitleAlign: 'center',
+                headerTintColor: '#FFB22C',
+                headerStyle: {
+                  backgroundColor: 'black',
+                },
+              }}
+            />
+            <Stack.Screen
+              name='settings'
+              options={{
+                headerTitle: 'Settings',
+                headerTitleAlign: 'center',
+                headerRight: () => (
+                  <Ionicons
+                    name="settings-outline"
+                    size={24}
+                    color="black"
+                    style={{ marginRight: 16 }}
+                  />
+                ),
+              }}
+            />
+            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+          </Stack>
+        </AuthProvider>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

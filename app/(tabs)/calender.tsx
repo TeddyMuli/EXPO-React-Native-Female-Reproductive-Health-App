@@ -3,10 +3,12 @@ import ViewCalender from '@/components/ViewCalender';
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useAuth } from '../context/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPeriods, getUser } from '@/queries/queries';
 
 const Calender = () => {
+  const queryClient = useQueryClient();
+
   const [logPeriod, setLogPeriod] = useState(false);
 
   const [selectedDays, setSelectedDays] = useState({});
@@ -29,21 +31,14 @@ const Calender = () => {
     });
   }, []);
 
-  const handleSubmit = async () => {
-    const selectedDates = Object.keys(selectedDays).sort();
-    const start_date = selectedDates[0];
-    const end_date = selectedDates[selectedDates.length - 1];
-    const user_id = userData?.id;
-
+  const handleSubmit = async (newPeriod: { start_date: any, end_date: any, user_id: number }) => {
     try {
-      const dataToSend = { user_id, start_date, end_date }
-
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/periods`, {
         method: "POST",
         headers: {
           "Content-Type" : "application/json"
         },
-        body: JSON.stringify(dataToSend)
+        body: JSON.stringify(newPeriod)
       });
       const body = await response.text();
 
@@ -51,12 +46,31 @@ const Calender = () => {
         console.error("Error: ", body);
         return;
       }
+      setLogPeriod(false)
 
       console.log("Period saved: ", body);
     } catch (error) {
       console.error("Unexpected Error: ", error)
     }
   };
+
+  const { mutate, isPending, isSuccess } = useMutation({
+    mutationFn: (newPeriod: { start_date: any, end_date: any, user_id: number }) => handleSubmit(newPeriod),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['periods'] })
+    }
+  });
+
+  const onSubmit = () => {
+    const selectedDates = Object.keys(selectedDays).sort();
+    const start_date = selectedDates[0];
+    const end_date = selectedDates[selectedDates.length - 1];
+    const user_id = userData?.id;
+
+    const dataToSend = { user_id, start_date, end_date }
+
+    mutate(dataToSend)
+  }
 
   return (
     <View className='bg-white'>
@@ -75,7 +89,7 @@ const Calender = () => {
               <Text className='text-black text-xl font-bold'>Close</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleSubmit} className='justify-center items-center bg-[#E4258F] w-[150px] p-3 rounded-xl mr-6'>
+            <TouchableOpacity onPress={onSubmit} className='justify-center items-center bg-[#E4258F] w-[150px] p-3 rounded-xl mr-6'>
               <Text className='text-white text-xl font-bold'>Save</Text>
             </TouchableOpacity>
           </View>

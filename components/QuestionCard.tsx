@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Image, View } from "react-native";
 import anonprofile from "@/assets/images/anonprofile.png";
+import { MessageSquare } from "lucide-react-native";
 
-const QuestionCard = ({ post, userName } : { post: any, userName: string }) => {
+const QuestionCard = ({ post, userName, setShowPost, setSelectedPost } : { post: any, userName: string, setShowPost: any, setSelectedPost: any }) => {
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -29,11 +30,6 @@ const QuestionCard = ({ post, userName } : { post: any, userName: string }) => {
       <Text style={styles.questionText}>
         {post?.content}
       </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Type your answer..."
-        placeholderTextColor="#888"
-      />
       <View style={styles.actionBar}>
         <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
           <Ionicons 
@@ -43,6 +39,18 @@ const QuestionCard = ({ post, userName } : { post: any, userName: string }) => {
           />
           <Text style={styles.likeCount}>{likes}</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setShowPost(true);
+            setSelectedPost(post)
+          }}
+          className="flex flex-row mr-auto ml-4 justify-center items-center"
+        >
+          <MessageSquare className="text-[#888]" />
+          <Text style={styles.likeCount}>{likes}</Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );
