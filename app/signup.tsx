@@ -13,6 +13,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { auth } from "@/firebase";
 import { Eye, EyeOff } from "lucide-react-native";
 import { AuthErrorCodes, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import {CountryPicker} from "react-native-country-codes-picker";
 
 const validationSchema = z
   .object({
@@ -57,28 +58,10 @@ const OptionSelector = ({ options, pregnant, onSelect } : { options: string[], p
 const signup = () => {
   const router = useRouter();
   const [hidePassword, setHidePassword] = useState(true);
+  const [show, setShow] = useState(false);
+  const [countryCode, setCountryCode] = useState('+256');
 
   const onSubmit = async () => {
-    /**
-    try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/register`, {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-          'X-App-Source': 'mobile' // Shows that the request is made from a mobile app
-        },
-        body: JSON.stringify(getValues())
-      })
-
-      if (response.ok) {
-        console.log("Success")
-      } else {
-        console.error("Error!")
-      }
-    } catch (error) {
-      console.error("Error: ", error)
-    }
-    */
     try {
       const { email, password } = getValues()
       await registerUser(email, password);
@@ -158,7 +141,16 @@ const signup = () => {
       console.error('Error registering user:', error);
       throw error;
     }
-  };  
+  };
+
+  const formatPhoneNumber = (number: string) => {
+    if (number.startsWith('0')) {
+      number = number.substring(1);
+    }
+
+    const formattedNo = `+${countryCode}${number}`
+    return formattedNo;
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal: 34, display: 'flex', paddingVertical: 17 }}>
@@ -218,24 +210,45 @@ const signup = () => {
 
             <View style={{ display: 'flex', gap: 6, marginTop: 16 }}>
               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Phone Number</Text>
-              <Controller
-                control={control}
-                render={({field: { value, onBlur, onChange }}) => (
-                  <TextInput 
-                    placeholder='Enter your Phone Number' 
-                    keyboardType='number-pad'
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={value => onChange(value)}
-                    style={{ borderColor: '#1E1E1E', borderWidth: 1, paddingHorizontal: 13, paddingVertical: 10, fontSize: 16 }} 
-                  />
-                )}
-                name="phone_number"
-                rules={{ required: "Phone number is required!" }}
-              />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <CountryPicker
+                  lang='en'
+                  show={show}
+                  pickerButtonOnPress={(item) => {
+                    setCountryCode(item.dial_code);
+                    setShow(false);
+                  }}
+                />
+                <Text
+                  style={{ fontSize: 16, marginHorizontal: 8 }}
+                  onPress={() => setShow(true)}
+                >
+                  {countryCode}
+                </Text>
+
+                <Controller
+                  control={control}
+                  render={({ field: { value, onBlur, onChange } }) => (
+                    <TextInput
+                      placeholder="Enter your Phone Number"
+                      keyboardType="number-pad"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={(inputValue) => {
+                        const formattedNumber = formatPhoneNumber(inputValue);
+                        onChange(formattedNumber);
+                      }}
+                      style={{ borderColor: '#1E1E1E', borderWidth: 1, paddingHorizontal: 13, paddingVertical: 10, fontSize: 16, flex: 1 }}
+                    />
+                  )}
+                  name="phone_number"
+                  rules={{ required: "Phone number is required!" }}
+                />
+              </View>
+
               {errors.phone_number && <Text className="text-red-500 text-sm">{errors.phone_number?.message}</Text>}
             </View>
-
+            
             <View style={{ display: 'flex', gap: 6, marginTop: 16 }}>
               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Password</Text>
               <View className='flex flex-row border border-[#1E1E1E] text-[16px] px-[13px] py-[10px] w-full'>

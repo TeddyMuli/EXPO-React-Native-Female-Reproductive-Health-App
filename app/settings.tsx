@@ -26,9 +26,9 @@ const sections = [
     title: 'Personal Data',
     icon: <Ionicons name="star" size={24} color="black" />,
     items: [
-      //{ title: 'Your name', id: 'yourName' },
-      //{ title: 'Secure access (PIN)', id: 'secureAccess' },
-      //{ title: 'Themes', id: 'themes' },
+      { title: 'Your name', id: 'yourName' },
+      { title: 'Secure access (PIN)', id: 'secureAccess' },
+      { title: 'Themes', id: 'themes' },
       { title: 'Calendar view', id: 'calenderView' }
     ],
   },
@@ -57,13 +57,13 @@ const sections = [
 ];
 
 const CommonHeader = ({ title, onBack }: { title: string; onBack: () => void }) => (
-  <View style={styles.headerContainer}>
+  <View style={styles.headerContainer} className='dark:bg-neutral-900'>
     <TouchableOpacity onPress={onBack} style={styles.backButton}>
-      <Ionicons name="chevron-back-outline" size={24} color="black" />
+      <Ionicons name="chevron-back-outline" size={24} className='dark:text-white text-black' />
     </TouchableOpacity>
     <Text style={styles.headerTitle}>{title}</Text>
   </View>
-)
+);
 
 const SettingsScreen = () => {
   const { user } = useAuth();
@@ -150,9 +150,9 @@ const SettingsScreen = () => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView className='dark:bg-neutral-900'>
       {selectedComponent ? (
-        <View>
+        <View className='dark:bg-neutral-900'>
           <CommonHeader
             title={
               sections

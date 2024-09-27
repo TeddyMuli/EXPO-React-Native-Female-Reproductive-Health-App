@@ -19,7 +19,7 @@ const PlanCard = ({ title, price, features, isSelected, onPress } : planCardProp
     onPress={onPress}
   >
     <Text style={styles.planTitle}>{title}</Text>
-    <Text style={styles.planPrice}>UGX {price.toLocaleString()}</Text>
+    <Text style={styles.planPrice}>UGX {price.toLocaleString()} per month</Text>
     {features.map((feature, index) => (
       <Text key={index} style={styles.planFeature}>• {feature}</Text>
     ))}

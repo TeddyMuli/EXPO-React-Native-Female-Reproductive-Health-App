@@ -1,31 +1,36 @@
-import React, { memo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { memo, useMemo } from 'react';
+import { View } from 'react-native';
 import { CalendarList } from 'react-native-calendars';
 
 const PeriodCalendar = ({ onDayPress, markedDates, periods } : { onDayPress: any, markedDates: any, periods: any }) => {
-  function parseDates(periods: any) {
-    const markedDates: any = {};
-    
+
+  const parseDates = (periods: any) => {
+    const parsedDates: any = {};
+
     periods?.forEach((period: any) => {
-      const startDate = new Date(period.start_date);
-      const endDate = new Date(period.end_date);
-  
+      let startDate = new Date(period.start_date);
+      let endDate = new Date(period.end_date);
+
       for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
         const formattedDate: string = date.toISOString().split('T')[0];
-        markedDates[formattedDate]= {
-          selected: true,
-          marked: true,
-          selectedColor: 'red'
-        };
+        if (!parsedDates[formattedDate]) { // Prevent overlapping conflicts
+          parsedDates[formattedDate] = {
+            selected: true,
+            marked: true,
+            selectedColor: '#E4258F'
+          };
+        }
       }
     });
-  
-    return markedDates;
-  }
-  const newMarkedDates = parseDates(periods)
-  
-  const updateMarkedDates = { ...markedDates, ...newMarkedDates }
 
+    return parsedDates;
+  };
+
+  // Use useMemo to avoid recalculating marked dates unnecessarily
+  const newMarkedDates = useMemo(() => parseDates(periods), [periods]);
+
+  // Merge markedDates prop with parsed period dates
+  const combinedMarkedDates = { ...markedDates, ...newMarkedDates };
 
   return (
     <View className=''>
@@ -33,7 +38,7 @@ const PeriodCalendar = ({ onDayPress, markedDates, periods } : { onDayPress: any
         <CalendarList
           onDayPress={onDayPress}
           markingType={'multi-dot'}
-          markedDates={updateMarkedDates}
+          markedDates={combinedMarkedDates}
           pastScrollRange={24}
           futureScrollRange={3}
           scrollEnabled={true}
@@ -58,23 +63,5 @@ const PeriodCalendar = ({ onDayPress, markedDates, periods } : { onDayPress: any
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 20,
-  },
-  button: {
-    backgroundColor: '#E4258F',
-    padding: 10,
-    borderRadius: 5,
-    marginHorizontal: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 export default memo(PeriodCalendar);

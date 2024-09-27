@@ -1,39 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getProducts, getCategories, getBestSelling, getUser } from '@/queries/queries';
+import { getProducts, getCategories, getUser, getFavorites } from '@/queries/queries';
 import { atom, useAtom } from 'jotai';
 import Loading from '@/components/Loading';
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '@/components/ProductCard';
+import { Heart } from 'lucide-react-native';
 
 export const cartAtom = atom<any[]>([]);
 
 const ShopScreen = () => {
   const queryClient = useQueryClient();
+  
   const { data: productsData, error: productsError, isLoading: productsLoading } = useQuery({ queryKey: ['products'], queryFn: getProducts });
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
-  const { data: bestSellingProducts, error: bestSellingProductsError, isLoading: bestSellingProductsLoading } = useQuery({ queryKey: ['bestselling'], queryFn: getBestSelling })
 
   const { user } = useAuth();
   const { data: userData } = useQuery({ queryKey: ['user'], queryFn: () => getUser(user?.email) })
+  const { data: favorites } = useQuery({ queryKey: ['favorites'], queryFn: () => getFavorites(userData.id) })
 
   const [cart, setCart] = useAtom(cartAtom);
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
+  const [showFavorites, setShowFavorites] = useState(false);
 
   useEffect(() => {
     if (productsData) {
-      if (selectedFilter === null || selectedFilter === -1) {
-        setFilteredProducts(productsData);
+      if (showFavorites) {
+        setFilteredProducts(productsData.filter((product: any) => 
+          favorites.some((favorite: any) => favorite.product_id == product.id)
+        ));
       } else {
-        setFilteredProducts(productsData.filter((product: any) => product.category_id === selectedFilter));
+        if (selectedFilter === null || selectedFilter === -1) {
+          setFilteredProducts(productsData);
+        } else {
+          setFilteredProducts(productsData.filter((product: any) => product.category_id === selectedFilter));
+        }
       }
     }
-  }, [productsData, selectedFilter]);
+  }, [productsData, selectedFilter, showFavorites]);
 
   const addToCart = (item: any) => {
     setCart((prevCart: any) => {
@@ -48,9 +57,12 @@ const ShopScreen = () => {
     });
   };
 
-
   if (productsLoading) {
-    return <Loading />;
+    return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color="#FF69B4" />
+    </View>
+   )
   }
 
   if (productsError) {
@@ -65,7 +77,7 @@ const ShopScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
 
-      <View className='flex justify-center items-center'>
+      <View className='flex flex-row justify-center items-center mx-4'>
         {/* Filter View */}
         <View className='flex flex-row justify-center items-center border border-black px-3 py-1 w-[300px] rounded-xl' style={styles.filterView}>
           <Text className=''>Filter: </Text>
@@ -79,6 +91,10 @@ const ShopScreen = () => {
               <Picker.Item key={category.id} label={category.name} value={category.id} />
             ))}
           </Picker>
+        </View>
+
+        <View className='ml-auto'>
+          <Heart onPress={() => setShowFavorites(!showFavorites)} fill={`${showFavorites ? "red" : "none"}`} className={`${showFavorites ? "text-red-500" : "text-black"}`} />
         </View>
       </View>
 

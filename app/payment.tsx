@@ -8,7 +8,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {PayWithFlutterwave} from 'flutterwave-react-native';
 import { useAuth } from './context/AuthContext';
-import { v4 as uuidv4 } from 'uuid';
 import { cartAtom } from './(tabs)/shop';
 import { useQuery } from '@tanstack/react-query';
 import { getUser } from '@/queries/queries';

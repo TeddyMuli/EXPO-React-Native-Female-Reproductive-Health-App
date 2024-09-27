@@ -1,11 +1,11 @@
 import { Alert, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from "../assets/images/logo.png";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import downarrow from "../assets/images/downarrow.png"
+//import downarrow from "../assets/images/downarrow.png"
 import { TouchableOpacity } from 'react-native';
-import googleIcon from "../assets/images/googleIcon.png";
-import appleicons from "../assets/images/appleicon.png";
+//import googleIcon from "../assets/images/googleIcon.png";
+//import appleicons from "../assets/images/appleicon.png";
 import { useRouter } from 'expo-router';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -13,10 +13,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthErrorCodes, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signInWithCredential, OAuthProvider } from 'firebase/auth';
 import { auth } from '@/firebase';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { useQuery } from '@tanstack/react-query';
+//import { useQuery } from '@tanstack/react-query';
 import { getUser } from '@/queries/queries';
-import bcrypt from 'react-native-bcrypt';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
+import { useToast } from 'react-native-toast-notifications';
+//import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 
 const validationSchema = z
   .object({
@@ -27,7 +28,25 @@ const validationSchema = z
 const Login = () => {
   const router = useRouter();
   const [hidePassword, setHidePassword] = useState(true);
-  const { data: userData } = useQuery({ queryKey: ['user'], queryFn: () => getUser(getValues().email) })
+  const toast = useToast();
+
+  //const { data } = useQuery({ queryKey: ['user'], queryFn: () => getUser(getValues().email) })
+
+  //const webClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    console.log("Login page")
+  }, [])
+
+  const [loading, setLoading] = useState(false);
+
+  /** 
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: webClientId,
+    });
+  }, []);
+  */
 
   const { 
     control,
@@ -43,37 +62,41 @@ const Login = () => {
     }
   });
 
-  const hashPassword = (password: string) => {
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, 10, (err, hashedPassword) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(hashedPassword);
-        }
-      });
-    });
-  };
-
-  const signInWithGoogle = async() => {
+  const signInWithGoogle = async () => {
+    /** 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider)
-      const user = result.user;
-      console.log("User signed in: ", user);
-    } catch (error) {
-      console.error("Error: ", error)
-    }
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log("userinfo", userInfo);
+      setLoading(true);
+  } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+          console.log(error)
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+          console.log(error)
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+          console.log(error)
+      } else {
+      }
+  } finally {
+    setLoading(false);
+  }
+    */
+   console.log("Sign in with google")
   }
 
   const signInWithApple = async () => {
     try {
+      setLoading(true);
+
       const provider = new OAuthProvider('apple.com');
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("User signed in: ", user);
     } catch (error) {
       console.error("Error: ", error);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -81,6 +104,7 @@ const Login = () => {
   const signInUser = async () => {
     const { email, password } = getValues();
     try {
+      setLoading(true)
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   
@@ -89,49 +113,45 @@ const Login = () => {
         return;
       }
   
-      console.log('Sign-in successful');
+      toast.show('Sign-in successful');
       router.push("/home")
       return user;
 
     } catch (error: any) {
-      if (error.code === AuthErrorCodes.NULL_USER) {
-        const { email: checkEmail, password: checkPassword } = getValues();
-        const hashedCheckPassword = await hashPassword(checkPassword);
-        
-        if ((userData.email === checkEmail) && (userData.password === hashedCheckPassword)) {
-          const newFirebaseUser = await createUserWithEmailAndPassword(auth, email, password);
-          const newUser = newFirebaseUser.user
-          await sendEmailVerification(newUser)
-
-          console.log("New user created")
-          return await signInUser();
-        } else {
-          Alert.alert("User does not exist");
-        }
+      if (error.code === 'auth/wrong-password') {
+        toast.show("Wrong password", {
+          type: "danger"
+        })
       } else {
-        console.error('Error during sign-in:', error);
+        try {
+          const userData = await getUser(getValues().email);
+          const { email: checkEmail, password: checkPassword } = getValues();
+          
+          //const salt = await BcryptReactNative.getSalt(10);
+          //const hashedCheckPassword = await BcryptReactNative.hash(salt, checkPassword);
+          //const isPasswordValid = await BcryptReactNative.compareSync(userData.password, hashedCheckPassword);
+          
+          if (userData) {
+            const newFirebaseUser = await createUserWithEmailAndPassword(auth, email, password);
+            console.log("User created on firebase");
+
+            const newUser = newFirebaseUser.user
+            toast.show("Confirm email!");
+            await sendEmailVerification(newUser)
+
+            console.log("New user created")
+            return await signInUser();
+          } else {
+            Alert.alert("User does not exist");
+          }
+        } catch (error) {
+          console.error('Error during sign-in:', error);
+      } finally {
+        setLoading(false);
       }
-    }
-  };
-
-
-  const onSubmit = async () => {
-    /**
-    try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-App-Source': 'mobile'
-        },
-        body: JSON.stringify(getValues())
-      })
-    } catch (error) {
-      console.error("Error: ", error)
-    }
-    */
-   router.push("/home")
   }
+}
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal: 34, display: 'flex', paddingVertical: 17 }}>
@@ -188,22 +208,61 @@ const Login = () => {
 
           {/* buttons */}
           <TouchableOpacity onPress={handleSubmit(signInUser)} style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 56, paddingVertical: 9, borderRadius: 5, }}>
-            <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Login</Text>
+            <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>
+              {loading ? "Logging in..." : 'Login'}
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={signInWithGoogle} style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
-            <Image source={googleIcon} style={{
-              width: 32, height: 32, objectFit: 'cover'
-            }} />
-            <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Continue with Google </Text>
+          {/** 
+          <TouchableOpacity
+            onPress={signInWithGoogle}
+            className='border-2 border-[#E4258F] mt-[30px] mx-[26px] px-[26px] py-[9px] rounded-md flex flex-row items-center justify-around'
+          >
+            {!loading ? (
+              <>
+                <Image source={googleIcon} style={{ width: 32, height: 32, objectFit: 'cover' }} />
+                <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Continue with Google </Text>
+              </>
+            ) : (
+              <Text>Logging in...</Text>
+            )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={signInWithApple} style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 26, paddingVertical: 9, borderRadius: 5, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
-            <Image source={appleicons} style={{ width: 32, height: 32, objectFit: 'cover' }} />
-            <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, }}>Continue with Apple</Text>
+          <TouchableOpacity
+            onPress={signInWithApple} 
+            className='border-2 border-[#E4258F] mt-[30px] mx-[26px] px-[26px] py-[9px] rounded-md flex flex-row items-center justify-around'          
+          >
+            {!loading ? (
+              <>
+                <Image source={googleIcon} style={{ width: 32, height: 32, objectFit: 'cover' }} />
+                <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Continue with Apple</Text>
+              </>
+            ) : (
+              <Text>Logging in...</Text>
+            )}
           </TouchableOpacity>
+          */}
 
-          <TouchableOpacity onPress={()=>router.push('/forgotPassword')} style={{marginTop:10, }}><Text style={{ color: '#E4258F', fontSize: 12 }}>Forgot Password ?</Text></TouchableOpacity>
+          <View className='flex flex-row justify-between items-center'>
+            {/**<TouchableOpacity
+              onPress={() => router.push("/passwordLessSignIn")}
+            >
+              <Text style={{ color: '#E4258F', fontSize: 12 }}>Passwordless SignIn</Text>
+            </TouchableOpacity>*/}
+
+            <TouchableOpacity
+              onPress={()=>router.push('/forgotPassword')}
+              style={{marginTop:10}}
+            >
+              <Text style={{ color: '#E4258F', fontSize: 12 }}>Forgot Password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={()=>router.push('/signup')}
+              style={{marginTop:10}}
+            >
+              <Text style={{ color: '#E4258F', fontSize: 12 }}>Create Account?</Text>
+            </TouchableOpacity>
+          </View>
 
         </ScrollView>
       </KeyboardAvoidingView>
@@ -212,5 +271,3 @@ const Login = () => {
 }
 
 export default Login
-
-const styles = StyleSheet.create({})

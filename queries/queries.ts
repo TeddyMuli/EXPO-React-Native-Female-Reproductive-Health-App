@@ -20,7 +20,7 @@ export async function getUser (email: string | null | undefined) {
 
 export const getCategories = async () => {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/categories/`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/Mcategories/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -60,7 +60,7 @@ export async function getArticles () {
 
 export async function getProducts () {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/shop/latest/`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/mobile`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -77,27 +77,6 @@ export async function getProducts () {
     console.error("Error fetching data: ", error)
   }
 }
-
-export async function getBestSelling () {
-  try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/best-selling/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data
-  } catch (error) {
-    console.error("Error fetching data: ", error)
-  }
-}
-
 
 export async function getPosts () {
   try {
@@ -159,9 +138,9 @@ export async function getReplies (post_id: any) {
   }
 }
 
-export async function getFavorite (user_id: any, product_id: number) {
+export async function getFavorite (user_id: any) {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/favorites/?user_id=${user_id}&product_id=${product_id}`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/favorites/?user_id=${user_id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -198,6 +177,27 @@ export async function getRatings (user_id: any, product_id: number) {
     console.error("Error fetching data: ", error)
   }
 }
+
+export async function getProductRatings (product_id: number) {
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/ratings/?product_id=${product_id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data
+  } catch (error) {
+    console.error("Error fetching data: ", error)
+  }
+}
+
 
 export async function getAllUsers () {
   try {

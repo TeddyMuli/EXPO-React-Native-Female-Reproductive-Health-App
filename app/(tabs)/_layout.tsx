@@ -10,7 +10,7 @@ import shoppingcart from "../../assets/images/shopingcart.png";
 import { useAtom } from 'jotai';
 import { cartAtom } from './shop';
 import { Text } from 'react-native';
-import { Gem } from 'lucide-react-native';
+import { CalendarDays, Gem } from 'lucide-react-native';
 
 const TabsLayout = () => {
   const router = useRouter();
@@ -95,7 +95,17 @@ const TabsLayout = () => {
           )
         }}
       />
+      <Tabs.Screen
+        name='calender'
+        options={{
+          title: 'Calender',
+          tabBarIcon: ({ focused }) => (
+            <CalendarDays size={24} color={focused ? "black" : "grey"} />
+          )
+        }}
+      />
     </Tabs>
+    
   );
 }
 

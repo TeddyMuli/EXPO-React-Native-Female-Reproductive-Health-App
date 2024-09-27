@@ -2,7 +2,7 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View, Linking } from 'react-
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextInput } from 'react-native'
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams  } from 'expo-router';
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,10 +17,11 @@ const validationSchema = z
     email: z.string().email().min(1, "Email is required!")
   });
 
-const forgotPassword = () => {
+const forgotPassword = (props: any) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const toast = useToast()
+  const toast = useToast();
+  const { url } = useLocalSearchParams(); 
 
   const { 
     getValues,
@@ -35,10 +36,38 @@ const forgotPassword = () => {
     }
   });
 
+  const handleSignInWithEmailLink = async (url: string) => {
+    try {
+      setLoading(true);
+
+      const email = await AsyncStorage.getItem('emailForSignIn');
+  
+      if (email) {
+        const result = await signInWithEmailLink(auth, email, url);
+  
+        if (result.user) {
+          console.log('Successfully signed in with email link!');
+        }
+      } else {
+        console.error('No email found in AsyncStorage.');
+      }
+    } catch (error) {
+      console.error('Error signing in with email link:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {  
+    if (url) {
+      handleSignInWithEmailLink(url);
+    }
+  }, [url]);
+
   const sendSignInLink = async () => {
     const email = getValues().email
     const actionCodeSettings = {
-      url: "https://femihub-e7f9a.firebaseapp.com/",
+      url: process.env.EXPO_PUBLIC_DYNAMIC_LINK!,
       handleCodeInApp: true,
       iOS: {
         bundleId: 'com.femihub.ios'
@@ -51,6 +80,8 @@ const forgotPassword = () => {
     };
 
     try {
+      setLoading(true);
+
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       await AsyncStorage.setItem('emailForSignIn', email);
       Alert.alert('Sign-In link sent to your email.');
@@ -58,19 +89,6 @@ const forgotPassword = () => {
       console.error('Error sending sign-in link:', error);
     }
   };
-
-  const sendResetPasswordLink = async () => {
-    const email = getValues().email;
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast.show('Password reset link sent to your email.');
-      router.push("/login");
-    } catch (error: any) {
-      console.error('Error sending password reset link:', error);
-    }
-    
-  }
   
   return (
     <SafeAreaView style={{ flex: 1, }} >
@@ -105,14 +123,16 @@ const forgotPassword = () => {
         </View>
 
         <TouchableOpacity 
-          onPress={sendResetPasswordLink}
+          onPress={sendSignInLink}
           style={{ borderColor: '#E4258F', borderWidth: 2, marginTop: 30, paddingHorizontal: 56, paddingVertical: 9, borderRadius: 5 }} 
         >
           <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: 20, textAlign: 'center' }}>Submit</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/login")}>
-          <Text className='text-[#E4258F] text-sm my-2'>login with password?</Text>
+          <Text className='text-[#E4258F] text-sm my-2'>
+            {loading ? "login with password?" : "Logging in..."}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -2,15 +2,16 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { ToastProvider } from 'react-native-toast-notifications'
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import "./globals.css"
+import { usePushNotifications } from '@/usePushNotifications';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -23,6 +24,10 @@ export default function RootLayout() {
     // amiri:require('../assets/fonts/Amiri-Bold.ttf')
   });
 
+  const { expoPushToken, notification } = usePushNotifications()
+
+  const data = JSON.stringify(notification, undefined, 2);
+  
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -33,11 +38,13 @@ export default function RootLayout() {
     return null;
   }
 
+
   return (
     // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <AuthProvider>
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
+      <>
+        <ToastProvider>
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="splashScreen3" options={{ headerShown: false }} />
@@ -48,6 +55,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="profile" options={{ headerShown: false }} />
             <Stack.Screen name="forgotPassword" options={{ headerTitle: 'Forgot Password', headerTintColor: 'black', headerBackButtonMenuEnabled: false, headerBackVisible: false, headerTitleAlign: 'center', headerStyle: { backgroundColor: '#E4258F' } }} />
+            <Stack.Screen name="passwordLessSignIn" options={{ headerTitle: 'Passwordless Sign In', headerTintColor: 'black', headerBackButtonMenuEnabled: false, headerBackVisible: false, headerTitleAlign: 'center', headerStyle: { backgroundColor: '#E4258F' } }} />
             <Stack.Screen name="handleEmailLink"  options={{ headerShown: false }} />
             <Stack.Screen name="cart" options={{ headerShown: false }} />
             <Stack.Screen name='verifycode' options={{ headerShown: false }} />
@@ -79,8 +87,9 @@ export default function RootLayout() {
             />
             <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
           </Stack>
-        </AuthProvider>
-      </ToastProvider>
+          </ToastProvider>
+        </>
     </QueryClientProvider>
+  </AuthProvider>
   );
 }

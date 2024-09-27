@@ -20,17 +20,27 @@ const Calender = () => {
 
   const onDayPress = useCallback((day: any) => {
     const dateString = day.dateString;
+  
     setSelectedDays((prevSelectedDays) => {
       const newSelectedDays: any = { ...prevSelectedDays };
+  
       if (newSelectedDays[dateString]) {
+        // Unselect the date
         delete newSelectedDays[dateString];
       } else {
-        newSelectedDays[dateString] = { selected: true, marked: true, selectedColor: 'red' };
+        // Select the date
+        newSelectedDays[dateString] = {
+          selected: true,
+          marked: true,
+          selectedColor: '#E4258F'
+        };
       }
+  
+      // Return the updated marked dates
       return newSelectedDays;
     });
   }, []);
-
+    
   const handleSubmit = async (newPeriod: { start_date: any, end_date: any, user_id: number }) => {
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/periods`, {
@@ -61,17 +71,44 @@ const Calender = () => {
     }
   });
 
+  const handlePeriodConflicts = (newPeriod: { start_date: string, end_date: string }, periods: any) => {
+    let mergedPeriods = [...periods];
+  
+    // Example logic to handle merging or splitting
+    mergedPeriods = mergedPeriods.filter((period: any) => {
+      const periodStart = new Date(period.start_date);
+      const periodEnd = new Date(period.end_date);
+      const newPeriodStart = new Date(newPeriod.start_date);
+      const newPeriodEnd = new Date(newPeriod.end_date);
+  
+      // Check for overlap or adjacency and merge periods
+      if (newPeriodEnd >= periodStart && newPeriodStart <= periodEnd) {
+        period.start_date = new Date(Math.min(periodStart.getTime(), newPeriodStart.getTime())).toISOString().split('T')[0];
+        period.end_date = new Date(Math.max(periodEnd.getTime(), newPeriodEnd.getTime())).toISOString().split('T')[0];
+        return true;
+      }
+  
+      return true;
+    });
+  
+    return mergedPeriods;
+  };
+  
+
   const onSubmit = () => {
-    const selectedDates = Object.keys(selectedDays).sort();
-    const start_date = selectedDates[0];
-    const end_date = selectedDates[selectedDates.length - 1];
-    const user_id = userData?.id;
-
-    const dataToSend = { user_id, start_date, end_date }
-
-    mutate(dataToSend)
+    if (selectedDays) {
+      const selectedDates = Object.keys(selectedDays).sort();
+      const start_date = selectedDates[0];
+      const end_date = selectedDates[selectedDates.length - 1];
+      const user_id = userData?.id;
+  
+      const newPeriod = { user_id, start_date, end_date };
+  
+      const updatedPeriods = handlePeriodConflicts(newPeriod, periods);
+  
+      mutate(updatedPeriods);
+    }
   }
-
   return (
     <View className='bg-white'>
       {!logPeriod && (

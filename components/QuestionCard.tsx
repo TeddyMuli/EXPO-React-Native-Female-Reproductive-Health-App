@@ -4,10 +4,15 @@ import { Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Image, View } from "react-native";
 import anonprofile from "@/assets/images/anonprofile.png";
 import { MessageSquare } from "lucide-react-native";
+import { useQuery } from "@tanstack/react-query";
+import { getReplies } from "@/queries/queries";
 
 const QuestionCard = ({ post, userName, setShowPost, setSelectedPost } : { post: any, userName: string, setShowPost: any, setSelectedPost: any }) => {
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+
+  const { data: replies } = useQuery({ queryKey: ['replies', post?.id], queryFn: () => getReplies(post?.id) });
+  const repliesCount = replies ? Object.keys(replies).length : 0;
 
   const handleLike = () => {
     if (isLiked) {
@@ -24,6 +29,7 @@ const QuestionCard = ({ post, userName, setShowPost, setSelectedPost } : { post:
         <Image source={anonprofile} style={styles.profileImage} />
         <View style={styles.userInfoText}>
           <Text style={styles.usernameText}>{userName}</Text>
+          <Text style={styles.usernameText}>{post?.id}</Text>
           <Text style={styles.spyUsernameText}>{post?.title}</Text>
         </View>
       </View>
@@ -48,7 +54,7 @@ const QuestionCard = ({ post, userName, setShowPost, setSelectedPost } : { post:
           className="flex flex-row mr-auto ml-4 justify-center items-center"
         >
           <MessageSquare className="text-[#888]" />
-          <Text style={styles.likeCount}>{likes}</Text>
+          <Text style={styles.likeCount}>{repliesCount}</Text>
         </TouchableOpacity>
 
       </View>

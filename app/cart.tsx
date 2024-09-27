@@ -56,9 +56,15 @@ const Cart = () => {
     }
   };
 
+  const removeProduct = (index: number) => {
+    const newCart = cart.filter((_, i) => i !== index);
+    setCart(newCart);
+  };
+
   return (
     <ScrollView className='my-8 mx-4'>
     <Text className='text-center text-xl font-semibold mb-4'>Shopping Cart</Text>
+    {cart?.length === 0 && <Text className='text-center'>No items in cart</Text>}
     {cart.map((product, index) => (
       <View key={index} className='flex-row items-center bg-white p-4 mb-4 rounded-lg shadow'>
         <Image source={{ uri: product.image }} className='w-20 h-20 rounded-lg' />
@@ -74,12 +80,13 @@ const Cart = () => {
             </Pressable>
             <Text className='ml-4 text-pink-500 font-semibold'>{`USh ${product.price}`}</Text>
           </View>
-          <Pressable className='mt-2'>
+          <Pressable onPress={() => removeProduct(index)} className='mt-2'>
             <Text className='text-pink-500'>Remove</Text>
           </Pressable>
         </View>
       </View>
     ))}
+    
     <View className='mt-4 p-4 bg-white rounded-lg shadow'>
       <Text className='text-lg font-medium'>Subtotal</Text>
       <Text className='text-xl font-bold text-pink-500'>

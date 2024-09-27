@@ -14,10 +14,10 @@ const SettingSection = ({
   items: { title: string; id: string }[];
   onItemPress: (id: string) => void;
 }) => (
-  <View>
+  <View className='dark:bg-black'>
     <View style={styles.sectionHeader}>
       {icon}
-      <Text style={styles.sectionHeaderText}>{title}</Text>
+      <Text className='dark:text-white' style={styles.sectionHeaderText}>{title}</Text>
     </View>
     {items.map((item) => (
       <SettingItem

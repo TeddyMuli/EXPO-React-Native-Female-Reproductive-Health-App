@@ -4,8 +4,9 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import anonprofile from "@/assets/images/anonprofile.png";
 import { Image } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAllUsers, getReplies } from '@/queries/queries';
+import { getAllUsers, getReplies, getUser } from '@/queries/queries';
 import { Controller, useForm } from 'react-hook-form';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface Reply {
   content: string; // Adjust based on your actual structure
@@ -14,16 +15,18 @@ interface Reply {
 const Post = ({ selectedPost, setShowPost, setSelectedPost } : { selectedPost: any, setShowPost: any, setSelectedPost: any }) => {
   const queryClient = useQueryClient();
   const { data: usersData, error: usersError, isLoading: usersLoading } = useQuery({ queryKey: ['users'], queryFn: () => getAllUsers() });
+  const { user } = useAuth();
+  const { data: currentUser } = useQuery({ queryKey: ['user'], queryFn: () => getUser(user?.email) });
 
   const [sending, setSending] = useState(false);
 
-  const user = usersData?.find((user: any) => user.id === selectedPost.user_id);
-  const userName = user ? user.name : 'Unknown User';
+  const userData = usersData?.find((user: any) => user.id === selectedPost.user_id);
+  const userName = userData ? userData.name : 'Unknown User';
 
   const { data: replies } = useQuery({ queryKey: ['replies'], queryFn: () => getReplies(selectedPost.id) })
 
   const {
-    control, getValues, handleSubmit, formState: { errors }
+    control, getValues, handleSubmit, formState: { errors }, reset
   } = useForm({
     defaultValues: {
       reply: ""
@@ -43,7 +46,10 @@ const Post = ({ selectedPost, setShowPost, setSelectedPost } : { selectedPost: a
         const body = await response.json();
         console.error("Error saving reply: ", body);
         throw new Error('Failed to save reply');
-      }      
+      }
+      reset({
+        reply: ""
+      })
     } catch (error) {
       console.error("Error: ", error);
       throw error;
@@ -61,7 +67,7 @@ const Post = ({ selectedPost, setShowPost, setSelectedPost } : { selectedPost: a
 
   const onSubmit = () => {
     mutate({
-      user_id: user.id,
+      user_id: currentUser.id,
       content: getValues().reply,
       post_id: selectedPost.id
     })
@@ -104,11 +110,13 @@ const Post = ({ selectedPost, setShowPost, setSelectedPost } : { selectedPost: a
 
         {/** Replies */}
         {replies?.map((reply: any, index: number) => {
+          const user = usersData?.find((user: any) => user.id === reply.user_id);
+          const userName = user ? user.name : 'Unknown User';
+
           return (
-            <View key={index}>
-              <Text style={styles.questionText}>
-                {reply?.content}
-              </Text>
+            <View key={index} className='p-3 border border-black rounded-lg my-1 flex'>
+              <Text className='text-[#E4258F]'>{userName}</Text>
+              <Text className='max-w-[200px]'>{reply?.content}</Text>
             </View>
           )
         })}

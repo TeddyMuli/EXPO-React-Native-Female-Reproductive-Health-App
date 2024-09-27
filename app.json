@@ -12,6 +12,9 @@
     },
     "ios": {
       "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Allow FemiHub to use FaceID"
+      },
       "config": {
         "usesNonExemptEncryption": false
       },
@@ -32,6 +35,12 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow FemiHub to use Face ID."
+        }
+      ],
       "expo-router",
       [
         "expo-font",

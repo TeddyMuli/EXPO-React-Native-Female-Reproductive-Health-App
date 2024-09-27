@@ -8,6 +8,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react-native
 import { useEffect, useState } from "react";
 import { Image, Modal, SafeAreaView, Switch, Text, TouchableOpacity, View, TouchableWithoutFeedback, TextInput, StyleSheet, Alert } from "react-native";
 import * as LocalAuthentication from 'expo-local-authentication';
+import { useColorScheme } from "nativewind"
 
 export const CycleReminders = ({ userId }: {userId: number}) => {
   const queryClient = useQueryClient();
@@ -79,8 +80,8 @@ export const CycleReminders = ({ userId }: {userId: number}) => {
       {options.map((item, index) => (
         <View key={index} className="flex flex-row gap-2">
           <View className="flex-1">
-            <Text className="font-semibold">{item.name}</Text>
-            <Text className="flex max-w-[360px]">{item.content}</Text>
+            <Text className="dark:text-white font-semibold">{item.name}</Text>
+            <Text className="dark:text-white flex max-w-[360px]">{item.content}</Text>
           </View>
           <Switch
             className="ml-auto"
@@ -173,8 +174,8 @@ export const MedicineReminder = ({ userId }: {userId: number}) => {
   return (
     <View style={{ marginHorizontal: 16 }} className="flex flex-row text-black">
       <View className="flex-1">
-        <Text className="font-semibold">Medicine Reminder</Text>
-        <Text className="flex max-w-[360px]">Remind me to take my medicine on time</Text>
+        <Text className="dark:text-white font-semibold">Medicine Reminder</Text>
+        <Text className="dark:text-white flex max-w-[360px]">Remind me to take my medicine on time</Text>
       </View>
       <Switch
         className="ml-auto"
@@ -255,7 +256,7 @@ export const ContraceptionReminders = ({ userId }: {userId: number}) => {
       {!clickMethod ? (
         <SafeAreaView className="flex mx-4">
           <View className="flex flex-row justify-center items-center border-b border-b-black/20">
-            <Text className="font-semibold">Track contraception</Text>
+            <Text className="dark:text-white font-semibold">Track contraception</Text>
             <Switch
               className="ml-auto"
               trackColor={{ false: "#767577", true: "#FF69B4" }}
@@ -268,7 +269,7 @@ export const ContraceptionReminders = ({ userId }: {userId: number}) => {
           <View className="my-4">
             <TouchableOpacity className="flex flex-row" onPress={() => setClickMethod(true)}>
               <View className="flex-1">
-                <Text className="font-semibold">Method of contraception</Text>
+                <Text className="dark:text-white font-semibold">Method of contraception</Text>
                 <Text>{selectedMethod}</Text>
               </View>
               <Ionicons className="ml-auto" name="chevron-forward-outline" size={24} color="#E4258F" />
@@ -276,11 +277,11 @@ export const ContraceptionReminders = ({ userId }: {userId: number}) => {
           </View>
   
           <View className="my-4">
-            <Text className="font-semibold text-[#E4258F]">Reminders</Text>
+            <Text className="dark:text-white font-semibold text-[#E4258F]">Reminders</Text>
             <View className="flex flex-row my-4">
               <View className="flex-1">
-                <Text className="font-semibold">Contraception reminders</Text>
-                <Text className="flex max-w-[360px]">Remind me to take my medicine on time</Text>
+                <Text className="dark:text-white font-semibold">Contraception reminders</Text>
+                <Text className="dark:text-white flex max-w-[360px]">Remind me to take my medicine on time</Text>
               </View>
               <Switch
                 className="ml-auto"
@@ -294,7 +295,7 @@ export const ContraceptionReminders = ({ userId }: {userId: number}) => {
   
           <View className="mt-auto justify-center items-center">
             <TouchableOpacity onPress={handleSave} className="mt-auto p-3 bg-[#E4258F] rounded-xl w-[60%] justify-center">
-              <Text className="text-white text-center text-lg">Save</Text>
+              <Text className="dark:text-white text-white text-center text-lg">Save</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -303,7 +304,7 @@ export const ContraceptionReminders = ({ userId }: {userId: number}) => {
           <View className="flex m-4 ">
             <View className="flex flex-row gap-6 items-center mb-10">
               <Ionicons onPress={() => setClickMethod(false)} name="chevron-back-outline" size={24} color="black" />
-              <Text className="font-medium text-lg">Methods of contraception</Text>
+              <Text className="dark:text-white font-medium text-lg">Methods of contraception</Text>
             </View>
             {methods.map((method, index) => (
               <TouchableOpacity key={index} onPress={() => setSelectedMethod(method.name)} className={`flex flex-row mb-4 justify-center items-center p-3 ${selectedMethod === method.name && "bg-pink-100 border border-pink-500 rounded-xl"}`}>
@@ -374,8 +375,8 @@ export const MeditationReminder = ({ userId }: {userId: number}) => {
   return (
     <View className="mx-4 flex flex-row">
       <View className="flex-1">
-        <Text className="font-semibold">Meditation Reminder</Text>
-        <Text className="flex max-w-[300px]">Remind me to practice conscious braething every day</Text>
+        <Text className="dark:text-white font-semibold">Meditation Reminder</Text>
+        <Text className="dark:text-white flex max-w-[300px]">Remind me to practice conscious braething every day</Text>
       </View>
       <Switch
         className="ml-auto px-2"
@@ -440,8 +441,8 @@ export const DailyLoggingReminders = ({ userId }: {userId: number}) => {
   return (
     <View className="mx-4 flex flex-row">
       <View className="flex-1">
-        <Text className="font-semibold">Daily logging reminders</Text>
-        <Text className="flex max-w-[360px]">Remind me to record important information in the app everyday</Text>
+        <Text className="dark:text-white font-semibold">Daily logging reminders</Text>
+        <Text className="dark:text-white flex max-w-[360px]">Remind me to record important information in the app everyday</Text>
       </View>
       <Switch
         className="ml-auto"
@@ -508,8 +509,8 @@ export const TrackingReminder = ({ userId }: {userId: number}) => {
     <View className="mx-4">
       <View className="flex flex-row my-4 border-b border-b-black/20 py-2">
         <View className="flex-1">
-          <Text className="font-semibold">Tracking Reminder</Text>
-          <Text className="flex max-w-[300px]">Once a week remind me record my well-being details in the app i f i havent logged anything for a while</Text>
+          <Text className="dark:text-white font-semibold">Tracking Reminder</Text>
+          <Text className="dark:text-white flex max-w-[300px]">Once a week remind me record my well-being details in the app i f i havent logged anything for a while</Text>
         </View>
         <Switch
           className="ml-auto"
@@ -524,7 +525,7 @@ export const TrackingReminder = ({ userId }: {userId: number}) => {
       </View>
       <View className="flex flex-row">
         <Text>Time</Text>
-        <Text className="ml-auto text-[#E4258F]">9:00 A.M</Text>
+        <Text className="dark:text-white ml-auto text-[#E4258F]">9:00 A.M</Text>
       </View>
     </View>
   );
@@ -578,12 +579,12 @@ export const SecretReminders = ({ userId }: {userId: number}) => {
   
   return (
     <View className="mx-6">
-      <Text className="">Choose the apearance of your reminders</Text>
+      <Text className="dark:text-white ">Choose the apearance of your reminders</Text>
       <TouchableOpacity onPress={() => {setIsSecret(false), handleSave()}} className="my-6 flex flex-row justify-center items-center">
         <View className={`p-3 flex flex-row justify-center items-center rounded-xl border ${!isSecret ? "border-pink-500" : "border-black/30"}`}>
           <Image source={require("@/assets/images/profile.png")} className="w-12 h-12" />
           <View className="ml-4">
-            <Text className="font-semibold">My Calender</Text>
+            <Text className="dark:text-white font-semibold">My Calender</Text>
             <Text>Your period is due on Friday</Text>
           </View>
         </View>
@@ -597,7 +598,7 @@ export const SecretReminders = ({ userId }: {userId: number}) => {
         <View className={`p-3 flex flex-row justify-center items-center rounded-xl border ${isSecret ? "border-pink-500" : "border-black/30"}`}>
           <Image source={require("@/assets/images/profile.png")} className="w-12 h-12" />
           <View className="ml-4">
-            <Text className="font-semibold">My Calender</Text>
+            <Text className="dark:text-white font-semibold">My Calender</Text>
             <Text>Your period is due on Friday</Text>
           </View>
         </View>
@@ -635,7 +636,7 @@ useEffect(() => {
 
   return (
     <View className="mx-4">
-      <Text className="my-4">Tell us what to call you</Text>
+      <Text className="dark:text-white my-4">Tell us what to call you</Text>
       <TextInput 
         placeholder="First name" 
         readOnly={readOnly}
@@ -646,11 +647,11 @@ useEffect(() => {
 
       <View className="flex flex-row gap-4 justify-between items-center">
         <TouchableOpacity className="bg-white border border-black/20 p-3 rounded-xl w-24">
-          <Text className="font-semibold text-black text-center">Close</Text>
+          <Text className="dark:text-white font-semibold text-black text-center">Close</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={saveName} className="p-3 bg-[#E4258F] rounded-xl w-24">
-          <Text className="font-semibold text-white text-center">Save</Text>
+          <Text className="dark:text-white font-semibold text-white text-center">Save</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -658,18 +659,12 @@ useEffect(() => {
 }
 
 export const SecureAccess = () => {
-  const [pin, setPin] = useState("");
   const [useBio, setUseBio] = useState(false);
-  const [showPinPage, setShowPinPage] = useState(false);
-  const [confirmPin, setConfirmPin] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const savedPin = await AsyncStorage.getItem('pin');
         const savedUseBio = await AsyncStorage.getItem('useBio');
-        if (savedPin !== null) setPin(savedPin);
         if (savedUseBio !== null) setUseBio(JSON.parse(savedUseBio));
       } catch (error) {
         console.error('Failed to load settings:', error);
@@ -679,147 +674,66 @@ export const SecureAccess = () => {
     loadSettings();
   }, []);
 
-  useEffect(() => {
-    const saveSettings = async () => {
+  const toggleSecureAccess = async () => {
+    if (!useBio) {
+      // Turning on Local Authentication
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      if (!compatible) {
+        Alert.alert('Biometrics not supported', 'Your device does not support biometrics.');
+        return;
+      }
+
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!enrolled) {
+        Alert.alert('Biometrics not enrolled', 'You have not enrolled biometrics on this device.');
+        return;
+      }
+
       try {
-        await AsyncStorage.setItem('pin', pin);
-        await AsyncStorage.setItem('useBio', JSON.stringify(useBio));
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Authenticate to enable app security',
+          fallbackLabel: 'Enter device PIN',
+        });
+
+        if (result.success) {
+          setUseBio(true);
+          await AsyncStorage.setItem('useBio', JSON.stringify(true));
+          Alert.alert('Success', 'App security enabled.');
+        } else {
+          Alert.alert('Authentication Failed', 'Please try again.');
+        }
       } catch (error) {
-        console.error('Failed to save settings:', error);
+        console.error('Biometric authentication failed:', error);
       }
-    };
-
-    saveSettings();
-  }, [pin, useBio]);
-
-
-  const handlePinChange = (text: string) => {
-    if (/^\d*$/.test(text) && text.length <= 4) {
-      setPin(text);
-    }
-  };
-
-  const handleConfirmPinChange = (text: string) => {
-    if (/^\d*$/.test(text) && text.length <= 4) {
-      setConfirmPin(text);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (pin.length !== 4) {
-      setError("PIN must be 4 characters");
-    } else if (pin !== confirmPin) {
-      setError("PINs do not match");
     } else {
-      setPin('');
-      setConfirmPin('');
-      setShowPinPage(false);
+      // Turning off Local Authentication
+      setUseBio(false);
+      await AsyncStorage.setItem('useBio', JSON.stringify(false));
+      Alert.alert('App security disabled.');
     }
   };
-
-  const handleBiometrics = async () => {
-    const compatible = await LocalAuthentication.hasHardwareAsync();
-    if (!compatible) {
-      Alert.alert('Biometrics not supported', 'Your device does not support biometrics.');
-      return;
-    }
-
-    const enrolled = await LocalAuthentication.isEnrolledAsync();
-    if (!enrolled) {
-      Alert.alert('Biometrics not enrolled', 'You have not enrolled biometrics on this device.');
-      return;
-    }
-
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to access your app',
-        fallbackLabel: 'Enter PIN',
-      });
-
-      if (result.success) {
-        Alert.alert('Authenticated', 'You are authenticated!');
-      } else {
-        Alert.alert('Authentication Failed', 'Please try again.');
-      }
-    } catch (error) {
-      console.error('Biometric authentication failed:', error);
-    }
-  };
-
 
   return (
-    <>
-    {!showPinPage ? (
     <View className="mx-4">
       <View className="flex flex-row my-4">
         <View className="flex-1">
-          <Text className="font-semibold">PIN</Text>
-          <Text className="flex max-w-[360px]">Choose a pin for your app</Text>
-        </View>
-        <Switch
-          className="ml-auto"
-          trackColor={{ false: "#767577", true: "#FF69B4" }}
-          thumbColor={pin ? "#fff" : "#f4f3f4"}
-          onValueChange={() => setShowPinPage(true)}
-          value={showPinPage}
-        />
-      </View>
-
-      <View className="flex flex-row">
-        <View className="flex-1">
-          <Text className="font-semibold">Fingerprint or Face recognition</Text>
-          <Text className="flex max-w-[360px]">If the device supports this function</Text>
+          <Text className="dark:text-white font-semibold">Secure App</Text>
+          <Text className="dark:text-white flex max-w-[360px]">Use biometrics or device PIN to lock the app</Text>
         </View>
         <Switch
           className="ml-auto"
           trackColor={{ false: "#767577", true: "#FF69B4" }}
           thumbColor={useBio ? "#fff" : "#f4f3f4"}
-          onValueChange={() => setUseBio(!useBio)}
+          onValueChange={toggleSecureAccess}
           value={useBio}
         />
       </View>
     </View>
-    ) : (
-        <Modal transparent={true} animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.title}>Enter 4-digit PIN</Text>
-              <TextInput
-                style={styles.pinInput}
-                value={pin}
-                onChangeText={handlePinChange}
-                keyboardType="numeric"
-                maxLength={4}
-                secureTextEntry={true}
-                placeholder="Enter PIN"
-              />
-              <TextInput
-                style={styles.pinInput}
-                value={confirmPin}
-                onChangeText={handleConfirmPinChange}
-                keyboardType="numeric"
-                maxLength={4}
-                secureTextEntry={true}
-                placeholder="Confirm PIN"
-              />      
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={onClose} style={styles.button}>
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
-    </>
   );
-}
-
+};
 export const Themes = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const {colorScheme, toggleColorScheme} = useColorScheme()
 
   useEffect(() => {
     const loadDarkMode = async () => {
@@ -837,17 +751,17 @@ export const Themes = () => {
   };
 
   return (
-    <View className="mx-4">
+    <View className="mx-4 dark:bg-neutral-900 dark:text-white">
       <View className="flex flex-row my-4 justify-center items-center">
         <View className="flex-1">
-          <Text className="font-semibold">Dark mode</Text>
+          <Text className="dark:text-white font-semibold">Dark mode</Text>
         </View>
         <Switch
           className="ml-auto"
           trackColor={{ false: "#767577", true: "#FF69B4" }}
           thumbColor={darkMode ? "#fff" : "#f4f3f4"}
-          onValueChange={saveDarkMode}
-          value={darkMode}
+          onValueChange={toggleColorScheme}
+          value={colorScheme=="dark"}
         />
       </View>
     </View>
@@ -886,8 +800,8 @@ export const CalenderView = () => {
       {options.map((item, index) => (
         <View key={index} className="flex flex-row gap-2 mt-4">
           <View className="flex-1">
-            <Text className="font-semibold">{item.name}</Text>
-            <Text className="flex max-w-[360px]">{item.content}</Text>
+            <Text className="dark:text-white font-semibold">{item.name}</Text>
+            <Text className="dark:text-white flex max-w-[360px]">{item.content}</Text>
           </View>
           <Switch
             className="ml-auto"
@@ -925,7 +839,7 @@ export const BackupData = () => {
     <SafeAreaView style={{ flex: 1 }} className="mx-4">
       <View className="flex flex-row justify-center items-center my-4">
         <View className="flex">
-          <Text className="font-semibold text-lg">Auto backup</Text>
+          <Text className="dark:text-white font-semibold text-lg">Auto backup</Text>
           <Text>Automatic data backup is perfomed every 5 days</Text>
         </View>
         <Switch
@@ -941,9 +855,9 @@ export const BackupData = () => {
         <View className="flex flex-row p-3 bg-white/10 rounded-xl border-2 border-black justify-center items-center" >
           <ShieldCheck size={36} className="text-black mr-4" />
           <View>
-            <Text className="max-w-[300px]">We do not make use of your data and don't sell to third parties</Text>
+            <Text className="dark:text-white max-w-[300px]">We do not make use of your data and don't sell to third parties</Text>
             <TouchableOpacity>
-              <Text className="text-[#E4258F] font-medium">Read more</Text>
+              <Text className="dark:text-white text-[#E4258F] font-medium">Read more</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -957,8 +871,8 @@ export const RestoreData = () => {
 
   return (
     <View className="m-4">
-      <Text className="text-2xl font-semibold">Warning!</Text>
-      <Text className="max-w-[360px] text-xl my-2">When you restore, the app data on your device is merged with the last backed up data</Text>
+      <Text className="dark:text-white text-2xl font-semibold">Warning!</Text>
+      <Text className="dark:text-white max-w-[360px] text-xl my-2">When you restore, the app data on your device is merged with the last backed up data</Text>
 
       <View>
         <View className="flex flex-row my-4 items-center rounded-xl border border-black/20 bg-white/70 p-3">
@@ -1000,14 +914,14 @@ export const DeleteData = () => {
     {showModal && (
       <Modal>
         <View className="flex flex-col justify-center items-center">
-          <Text className="text-2xl font-semibold">Warning!</Text>
-          <Text className="max-w-[360px] text-xl my-2">When you delete, all data on your device will be lost</Text>
+          <Text className="dark:text-white text-2xl font-semibold">Warning!</Text>
+          <Text className="dark:text-white max-w-[360px] text-xl my-2">When you delete, all data on your device will be lost</Text>
           <View className="flex flex-row gap-4">
             <TouchableOpacity onPress={() => setShowModal(false)} className="bg-white border border-black/20 p-3 rounded-xl w-24">
-              <Text className="font-semibold text-black text-center">Close</Text>
+              <Text className="dark:text-white font-semibold text-black text-center">Close</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleDeleteData} className="p-3 bg-[#E4258F] rounded-xl w-24">
-              <Text className="font-semibold text-white text-center">Delete</Text>
+              <Text className="dark:text-white font-semibold text-white text-center">Delete</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1016,8 +930,8 @@ export const DeleteData = () => {
     <SafeAreaView style={{ flex: 1 }} className="mx-4">
       <TouchableOpacity onPress={() => setShowModal(true)} className="flex flex-row justify-center items-center my-4">
         <View className="flex">
-          <Text className="font-semibold text-lg">Delete data from phone</Text>
-          <Text className="max-w-[300px]">You can restore data from  a backup if you have one</Text>
+          <Text className="dark:text-white font-semibold text-lg">Delete data from phone</Text>
+          <Text className="dark:text-white max-w-[300px]">You can restore data from  a backup if you have one</Text>
         </View>
         <Ionicons name="chevron-forward-outline" size={24} color="#E4258F" />
       </TouchableOpacity>
@@ -1026,9 +940,9 @@ export const DeleteData = () => {
         <View className="flex flex-row p-3 bg-white/10 rounded-xl border-2 border-black justify-center items-center" >
           <ShieldCheck size={36} className="text-black mr-4" />
           <View>
-            <Text className="max-w-[300px]">We do not make use of your data and don't sell to third parties</Text>
+            <Text className="dark:text-white max-w-[300px]">We do not make use of your data and don't sell to third parties</Text>
             <TouchableOpacity>
-              <Text className="text-[#E4258F] font-medium">Read more</Text>
+              <Text className="dark:text-white text-[#E4258F] font-medium">Read more</Text>
             </TouchableOpacity>
           </View>
         </View>

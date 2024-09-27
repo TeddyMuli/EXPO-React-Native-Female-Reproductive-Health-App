@@ -26,7 +26,7 @@ const splashScreen3 = () => {
 
 {/* buttons */}
       <View style={{display:'flex', alignItems:'center', position:'absolute', bottom:'5%', flexDirection:'row',justifyContent:'space-between',  width:'100%'}}>
-        <TouchableOpacity  onPress={()=>router.replace('/passwordlesSignIn')}>
+        <TouchableOpacity  onPress={()=>router.replace('/login')}>
           <Text style={{color:'#E4258F', fontWeight:700, fontSize:20}}>Skip</Text>
         </TouchableOpacity>
 

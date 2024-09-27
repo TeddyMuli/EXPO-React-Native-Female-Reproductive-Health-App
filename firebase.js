@@ -3,13 +3,13 @@ import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/aut
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA-FRxKu0Lcl7ZOpZbOAVj2lSbq-_V-5Dg",
-  authDomain: "femihub-e7f9a.firebaseapp.com",
-  projectId: "femihub-e7f9a",
-  storageBucket: "femihub-e7f9a.appspot.com",
-  messagingSenderId: "253516920814",
-  appId: "1:253516920814:web:301bb995b517c9146080ff",
-  measurementId: "G-G8HWHQREGH"
+  apiKey: "AIzaSyDixDVkH-wh1sU8vyq0m3gD5ehWzDCNVzI",
+  authDomain: "femihub-7047b.firebaseapp.com",
+  projectId: "femihub-7047b",
+  storageBucket: "femihub-7047b.appspot.com",
+  messagingSenderId: "450652021008",
+  appId: "1:450652021008:web:611140fa405497f3344595",
+  measurementId: "G-311BTT1YZK"
 };
 
 const app = initializeApp(firebaseConfig);

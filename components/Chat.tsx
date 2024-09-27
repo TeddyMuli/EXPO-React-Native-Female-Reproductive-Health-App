@@ -53,11 +53,11 @@ const Chat = ({ setShowChat } : { setShowChat: any }) => {
           
           <View className=''>
             <View className="self-start my-2 p-3 bg-white rounded-3xl">
-              <Text className='text-black max-w-[200px]' >Chat with your doctor ghgjhghjghjgj</Text>
+              <Text className='text-black max-w-[200px]' >Chat with your doctor</Text>
             </View>
 
             <View className="self-end my-2 p-3 bg-[#E4258F] rounded-3xl">
-              <Text className='text-white max-w-[200px]' >Chat with your doctor ghgjhghjghjgj</Text>
+              <Text className='text-white max-w-[200px]' >Chat with your doctor</Text>
             </View>
 
             <View className='flex flex-row justify-center items-center rounded-full w-full bg-white p-3 mt-2'>

@@ -10,7 +10,7 @@ const SettingItem = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity style={styles.settingItem} onPress={onPress}>
-    <Text style={styles.settingItemText}>{title}</Text>
+    <Text className='dark:text-white text-[16px] text-[#333]'>{title}</Text>
     <Ionicons name="chevron-forward" size={24} color="#888" />
   </TouchableOpacity>
 );
@@ -24,10 +24,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-  },
-  settingItemText: {
-    fontSize: 16,
-    color: '#333',
   },
 });
 
